@@ -1,0 +1,43 @@
+.sidebar-wrap {
+    z-index: 99;
+    width: 200px;
+    height: 100vh;
+    position: fixed;
+    left:282px;
+    padding: 12px 0;
+    box-sizing: border-box;
+    .logo-wrap {
+        display: flex;
+        justify-content: flex-start;
+        margin-bottom: 12px;
+        .el-image {
+            width: 36px;
+            &:hover {
+                cursor: pointer;
+            }
+        }
+    }
+    .menu{
+
+        .el-menu{
+            border: none;
+            background: transparent;
+            .el-menu-item{
+                height: 42px;
+                line-height: 42px;
+                margin-top: 6px;
+                border-radius: 21px;
+
+                color: #fff;
+                &:hover{
+                    background: #262629;
+                }
+                &.is-active{
+                    color: #63e2b7;
+                    background: #1d302c;
+
+                }
+            }
+        }
+    }
+}
