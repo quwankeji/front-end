@@ -29,7 +29,7 @@
           <el-icon><House /></el-icon>
           提醒
         </el-menu-item> -->
-        <el-menu-item index="4">
+        <el-menu-item index="4" @click="openChat">
           <el-icon><ChatRound /></el-icon>
           聊天
         </el-menu-item>
@@ -52,11 +52,22 @@
       </el-menu>
     </div>
   </div>
+  <el-dialog v-model="data.dialogTableVisible" :width="1200" title="会话">
+    <chat />
+  </el-dialog>
 </template>
 
 <script setup lang="ts">
-import { onMounted, onUnmounted } from "vue";
+import { onMounted, onUnmounted,reactive } from "vue";
 import LOGO from "@/assets/img/logo.png";
+import chat from "@/components/chat/index.vue";
+const data = reactive({
+  dialogTableVisible:false
+})
+//------------聊天
+const openChat= () => {
+  data.dialogTableVisible = true;
+}
 </script>
 
 <style lang="less" scoped>

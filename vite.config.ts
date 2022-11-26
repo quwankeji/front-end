@@ -14,7 +14,7 @@ export default defineConfig({
         rewrite: path => path.replace(/^\/file/, '/file') // 将请求中/api用空值替换重写，根据实际业务修改
       },
       '/business': {
-        target: "http://192.168.23.103:9002",
+        target: "http://114.132.180.207:9002",
         changeOrigin: true,
         logLeve: 'debug',
         rewrite: path => path.replace(/^\/business/, '/business') // 将请求中/api用空值替换重写，根据实际业务修改

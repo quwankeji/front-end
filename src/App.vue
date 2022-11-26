@@ -3,7 +3,7 @@
     <!-- 侧边栏 -->
     <sideBar /> 
 
-    <div class="content-wrap">
+    <div class="content-wrap" >
       <router-view class="app-wrap" v-slot="{ Component }">
         <keep-alive>
           <component v-if="$route.meta.keepAlive" :is="Component" />

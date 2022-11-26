@@ -1,5 +1,5 @@
 .content-wrap {
-    max-width: 550px;
+    min-width: 515px;
     position: relative;
     .square_header {
       height: 54px;
@@ -28,65 +28,68 @@
       cursor: pointer;
       height: calc(100% - 280px);
       overflow-y: auto;
-      
-      .list_item {
-        .compose_user {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-        }
-        .comment_name {
-          flex: 1;
-          margin-left: 10px;
-        }
-        .delete{
-          margin-left: 10px;
-        }
-        .comment_content {
-          margin: 10px 0 10px 40px;
-          .text {
-            text-align: justify;
-            overflow: hidden;
-            white-space: pre-wrap;
-            word-break: break-all;
-          }
-        }
-        .bottom_function {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          margin: 0 0 0 40px;
-          .opt-item {
+      >div{
+        height: 100%;
+        .list_item {
+          .compose_user {
             display: flex;
             align-items: center;
-            .active{
-              color: #63e2b7;
-            }
-            span {
-              margin-left: 10px;
+            justify-content: space-between;
+          }
+          .comment_name {
+            flex: 1;
+            margin-left: 10px;
+          }
+          .delete{
+            margin-left: 10px;
+          }
+          .comment_content {
+            margin: 10px 0 10px 40px;
+            .text {
+              text-align: justify;
+              overflow: hidden;
+              white-space: pre-wrap;
+              word-break: break-all;
             }
           }
-        }
-        .demo-image__preview {
-          max-height: 430px;
-          overflow-y: auto;
-          margin: 10px 0;
-          display: flex;
-          flex-wrap: wrap;
-          grid-column-gap: 9px;
-          grid-row-gap: 5px;
-          .image_item {
-            max-width: calc((100% / 3) - 6px);
-            overflow: hidden;
+          .bottom_function {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 0 0 0 40px;
+            .opt-item {
+              display: flex;
+              align-items: center;
+              .active{
+                color: #63e2b7;
+              }
+              span {
+                margin-left: 10px;
+              }
+            }
           }
-        }
-        .video {
-          #refPlayerWrap {
-            width: 100%;
-            height: auto;
+          .demo-image__preview {
+            max-height: 430px;
+            overflow-y: auto;
+            margin: 10px 0;
+            display: flex;
+            flex-wrap: wrap;
+            grid-column-gap: 9px;
+            grid-row-gap: 5px;
+            .image_item {
+              max-width: calc((100% / 3) - 6px);
+              overflow: hidden;
+            }
+          }
+          .video {
+            #refPlayerWrap {
+              width: 100%;
+              height: auto;
+            }
           }
         }
       }
+     
     }
   }
 

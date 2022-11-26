@@ -18,12 +18,6 @@ const routes = [
         path: "/square/detail",
         component: () => import("@/views/square/detail.vue")
 
-    },
-    {
-        name: "chat",
-        path: "/chat",
-        component: () => import("@/components/chat/index.vue")
-
     }
 ]
 export default routes;

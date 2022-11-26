@@ -122,12 +122,6 @@
           </div>
         </div>
       </div>
-      <p
-        :class="['loading', data.listItem.initLoading ? 'initloaing' : '']"
-        v-if="data.listItem.loading"
-      >
-        {{ data.listItem.noticeText }}
-      </p>
     </div>
   </div>
   <el-dialog v-model="data.dialogTableVisible" :width="1200" title="会话">
@@ -167,7 +161,6 @@ const data = reactive({
     pageSize: 10,
     initLoading: true,
     loading: false,
-    noticeText: "努力加载中...",
     invitationList: [] as any,
   },
 });
@@ -218,7 +211,7 @@ const addTag = () => {
     .then(async function (res) {
       if (res.status === 200) {
         data.listItem.pageNum = 1;
-        await getList();
+         getList();
         ElMessage({
           message: "发布成功",
           type: "success",
@@ -229,20 +222,27 @@ const addTag = () => {
 //------------获取列表part
 const getList = () => {
   data.loading = true;
+  data.listItem.loading = true;
   axios
     .post("/business/tags/get/page", {
       pageNum: data.listItem.pageNum,
       pageSize: data.listItem.pageSize,
     })
     .then(function (res) {
-      data.listItem.pageNum++;
-      if (res.data.list.length > 0) {
+      data.loading = false;
+      if (res.data&&res.data.list.length > 0) {
         data.listItem.invitationList = [...res.data.list];
       }
-      data.listItem.loading = true;
-      data.loading = false;
+      data.listItem.pageNum++;
+      if(data.listItem.pageNum<=10){
+         data.listItem.loading = true;
+         return
+      }
+      data.listItem.loading = false;
+     
 
     });
+
 };
 //------------点赞part
 const pointLike=(item:any)=>{

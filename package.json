@@ -9,7 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@rongcloud/engine": "^5.2.5",
+    "@rongcloud/engine": "^5.2.2",
     "@rongcloud/imkit": "^5.2.2",
     "@rongcloud/imlib-next": "^5.4.0",
     "@rongcloud/imlib-v4": "^4.6.4",
