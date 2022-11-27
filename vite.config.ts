@@ -18,6 +18,12 @@ export default defineConfig({
         changeOrigin: true,
         logLeve: 'debug',
         rewrite: path => path.replace(/^\/business/, '/business') // 将请求中/api用空值替换重写，根据实际业务修改
+      },
+      '/oauth': {
+        target: "http://192.168.23.102:10010",
+        changeOrigin: true,
+        logLeve: 'debug',
+        rewrite: path => path.replace(/^\/business/, '/business') // 将请求中/api用空值替换重写，根据实际业务修改
       }
     }
   },

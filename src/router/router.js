@@ -1,5 +1,10 @@
 const routes = [
     {
+        name: "login",
+        path: "/login",
+        component: () => import("@/views/user/index.vue")
+    },
+    {
         path: '/',
         name: 'home',
         meta: {

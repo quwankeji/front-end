@@ -1,11 +1,13 @@
-import { createApp } from 'vue'
 import '@/assets/css/main.less';
-import ElementPlus from 'element-plus'
 import 'element-plus/dist/index.css'
+import 'vue3-video-play/dist/style.css' 
+import '@/assets/css/common/reset.css' 
+import 'normalize.css' 
+import { createApp } from 'vue'
+import ElementPlus from 'element-plus'
 import * as ElementPlusIconsVue from '@element-plus/icons-vue'
 import VueLazyload from "vue-lazyload";
-import VideoPlay from 'vue3-video-play' // 引入组件 
-import 'vue3-video-play/dist/style.css' // 引入css 
+import VideoPlay from 'vue3-video-play' 
 import ZWRequest from '@/http/index.ts'
 import VuemoothScroll from "vue-smooth-scroll";//隐藏滚动条
 import router from "./router/index"
