@@ -1,7 +1,6 @@
 
 
-const userInfo = {
-    userId:0
-};
+const userInfo = localStorage.userInfo ? JSON.parse(localStorage.userInfo) :  null
+;
 export {userInfo};
   

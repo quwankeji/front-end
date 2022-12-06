@@ -1,53 +1,11 @@
 <template>
   <div class="content-wrap">
     <div class="square_header border">
-      趣玩广场
-      <el-icon class="chat" @click="openChat" title="消息会话"
-        ><ChatRound
-      /></el-icon>
+      组队
+      <el-icon class="addTeam" @click="addTeam" title="发起组队"
+        ><Plus /></el-icon>
     </div>
-    <div class="compose_comment padding border">
-      <div class="top_input">
-        <div class="compose_user">
-          <el-avatar :size="30" :max="30" :src="data.userImg" />
-        </div>
-        <div class="compose_textarea">
-          <!-- <el-input
-            class="title"
-            v-model="data.addData.title"
-            type="text"
-            placeholder="标题"
-          /> -->
-          <el-input
-            v-model="data.addData.content"
-            :autosize="{ minRows: 2, maxRows: 4 }"
-            type="textarea"
-            resize="none"
-            placeholder="说说您的新鲜事..."
-          />
-        </div>
-      </div>
-      <div class="link_upload">
-        <el-upload
-          class="upload"
-          :action="'/file/path'"
-          :accept="upLoad.accept"
-          :before-upload="(file:any) => upLoad.handleBeforeUpload(file, upLoad.accept)"
-          :on-success="upLoad.handleSuccess"
-          :file-list="data.fileList"
-        >
-          <el-icon :size="20" :color="'rgb(99,226,183)'"><Document /></el-icon>
-          <template #tip>
-            <div v-if="data.fileList.length == 0" class="el-upload__tip">
-              仅支持上传图片和视频文件。
-            </div>
-          </template>
-        </el-upload>
-        <!-- <el-icon :size="20" :color="'rgb(99,226,183)'"><Link /></el-icon> -->
-      </div>
-      <div class="fb">
-        <el-button type="primary" @click="addTag">发布</el-button>
-      </div>
+    <div class="compose_comment  border">
     </div>
     <div
       class="comment_item"
@@ -66,7 +24,7 @@
         <div class="compose_user">
           <el-avatar :size="30" :max="30" :src="data.userImg" />
           <div class="comment_name">
-            <el-link type="info">{{ item.name }}</el-link>
+            <el-link type="info">{{ item.userName }}</el-link>
           </div>
           <div class="location_time">
             {{ item.location }}&nbsp·&nbsp{{
@@ -75,7 +33,7 @@
             <el-icon
               class="delete"
               @click.stop="deleteInvitation(item.id)"
-              v-if="(item.userId === userInfo?.id)"
+              v-if="item.userId === userInfo?.userId"
               ><DeleteFilled
             /></el-icon>
           </div>
@@ -116,11 +74,11 @@
             <el-icon :class="{ active: item.userLikeStatus }"
               ><Pointer
             /></el-icon>
-            <span>{{ item.likesList.length }}</span>
+            <span>{{ item.likesList?.length }}</span>
           </div>
           <div class="opt-item">
             <el-icon><ChatSquare /></el-icon>
-            <span>{{ item.commentsList.length }}</span>
+            <span>{{ item.commentsList?.length }}</span>
           </div>
           <div class="opt-item">
             <el-icon :class="{ active: item.userLikeStatu }"><Star /></el-icon>
@@ -130,37 +88,27 @@
       </div>
     </div>
   </div>
-  <el-dialog v-model="data.dialogTableVisible" :width="1200" title="会话">
-    <chat />
-  </el-dialog>
+    <InitiateTeam ref="addTeamDialog" :getList="getList" />
 </template>
 
 <script lang="ts" setup>
 import { ref, reactive, toRefs } from "vue";
 import { useRouter } from "vue-router";
 import { ElMessage, ElMessageBox } from "element-plus";
-import axios from "axios";
 import { dateFormatPipe } from "@/util/index";
 import { userInfo } from "@/state/user";
 import request from "@/http/request"; // 引入封装的request.js文件
-import chat from "@/components/chat/index.vue";
-import video from "@/assets/video/a.mp4";
-import { tr } from "element-plus/es/locale";
+import InitiateTeam from "@/components/team/InitiateTeam.vue";
+const addTeamDialog = ref(null)
+
 const router = useRouter();
 const data = reactive({
   textarea: "",
   fileList: [],
   loading: false,
-  dialogTableVisible: false,
   userImg:
     "https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png",
-  addData: {
-    //提交数据
-    content: "",
-    imgUrlList: [] as any,
-    title: "",
-    videoUrl: "",
-  },
+  
   listItem: {
     pageNum: 1,
     pageSize: 10,
@@ -169,65 +117,9 @@ const data = reactive({
     invitationList: [] as any,
   },
 });
-//------------聊天
-const openChat = () => {
-  data.dialogTableVisible = true;
-};
-//------------文件上传part
-const upLoad = {
-  accept: "image/jpg,image/jpeg,image/png,video/mp4",
-  handleBeforeUpload: (file: any, accept: any) => {
-    let validateList: any = [];
-    accept.split(",").forEach((item: any) => {
-      validateList.push(item.split("/")[1]);
-    });
-    var fileSuffix = file.name.substring(file.name.lastIndexOf(".") + 1);
-    if (validateList.indexOf(fileSuffix) === -1) {
-      ElMessage({
-        message: `请上传${accept}格式的图片`,
-        type: "warning",
-      });
-      return false;
-    }
-  },
-  handleSuccess: (response: any, file: any, fileList: any) => {
-    if (response.success && fileList.length > 0) {
-      data.fileList = fileList;
-      console.log("上传成功", data.fileList);
-    }
-  },
-};
-//------------发贴part
-const addTag = () => {
-  data.loading = true;
-  let files: any = [];
-  data.fileList.forEach((element: any) => {
-    files.push(element.response.data);
-  });
-  data.addData.imgUrlList = files;
-  request({
-    url: `/business/tags/add`,
-    method: "post",
-    data: {
-      content: data.addData.content,
-      imgUrlList: data.addData.imgUrlList,
-      title: data.addData.title,
-      tagType: 1, ///朋友圈1、组队2
-      // videoUrl: "string",
-    },
-  })
-    .then((res: any) => {
-      console.log(res)
-        data.listItem.pageNum = 1;
-        getList();
-        ElMessage({
-          message: "发布成功",
-          type: "success",
-        });
-    })
-    .catch((err) => {
-      console.log(err);
-    });
+//------------发起组队
+const addTeam = () => {
+  addTeamDialog.value.data.visible = true
 };
 //------------获取列表part
 const getList = () => {
@@ -239,7 +131,7 @@ const getList = () => {
     data: {
       pageNum: data.listItem.pageNum,
       pageSize: data.listItem.pageSize,
-      tagType:1
+      tagType:2
     },
   })
     .then((res: any) => {
@@ -257,6 +149,7 @@ const getList = () => {
       ElMessage({
                 message:err,
                 type: 'error',
+                duration: 3000
             });
     });
 };

@@ -125,9 +125,12 @@ export default {
     },
     // 创建imkit连接
     createImkit() {
+      let rongYunToken= localStorage.rongYunToken??null 
+      // "8Le8Hqs25cM7RcKoc9mK4J/IAp9AdeV3@0153.cn.rongnav.com;0153.cn.rongcfg.com"
+console.log(rongYunToken)
       imkit
         .connect(
-          "8Le8Hqs25cM7RcKoc9mK4J/IAp9AdeV3@0153.cn.rongnav.com;0153.cn.rongcfg.com"
+          localStorage.rongYunToken
         )
         .then((res) => {
           console.info("连接结果打印：", res);

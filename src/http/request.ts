@@ -1,16 +1,74 @@
-// 封装类
 import axios from 'axios'
-import { AxiosInstance, AxiosRequestConfig } from 'axios'
-class ZWRequest {
-  instance: AxiosInstance
-  constructor(config: AxiosRequestConfig) {
-    this.instance = axios.create(config)
-  }
+import { ElMessage, ElMessageBox } from "element-plus";
+// import router from '../router'
+// process.env.VUE_APP_API
+const service = axios.create({
+    baseURL: '',//.env文件配置接口地址
+    timeout: 40 * 1000, // 超时
+})
 
-  request(config: AxiosRequestConfig): void {
-    this.instance.request(config).then((res) => {
-      console.log(res) // 此处能成功打印出结果代表成功
-    })
-  }
-}
-export default ZWRequest
+// 请求拦截器
+service.interceptors.request.use(
+    config => {
+        //存储token
+        if(localStorage.token) {
+            config.headers.Authorization = "Bearer "+localStorage.token;
+        }
+        return config;
+    },
+    error => {
+        return Promise.reject(error);
+    }
+)
+
+// 响应拦截器
+service.interceptors.response.use(
+    response => {
+        // 接收后台参数状态
+        const res = response;
+        if(res.code == 20000 || res.status == 200 || res.success || res.ErrorCode == 20000) {
+            return res.data;
+        }else {
+            let message = (res.error && res.error.message) || res.message || res.msg || '未知错误';
+            ElMessage({
+                message,
+                type: 'error',
+                duration: 5 * 1000
+            });
+            console.log('拦截器打印错误:', res);
+            // 这里可以设置后台返回状态码是500或者是其他,然后重定向跳转
+            // if(res.ErrorCode == 500) {
+            //     router.push('/login')
+            // }
+            return Promise.reject(
+                new Error(res.message || (res.error &&res.error.message) || '未知错误')
+            );
+        }
+    },
+    error => {
+        if(error.response) {
+            // error.response有错误信息,是接口错误,不是取消请求
+            // 获取错误码,弹出提示信息,reject()
+            let code = error.response.status;
+            if(code == 401) {
+                // router.push('/login');
+                localStorage.removeItem('token')
+                localStorage.removeItem('userInfo')
+                return Promise.reject(
+                    new Error('您还未登录或登录过期,请重新登录！')
+                );
+            }
+            // ElMessage({
+            //     message: '服务器繁忙, 请稍后再试!  ' + code,
+            //     type: 'error',
+            //     duration: 3 * 1000
+            // });
+            return Promise.reject(error.response.data);
+        }else {
+            // 是取消请求
+            // 直接reject
+            return Promise.reject(error.response.data);
+        }
+    }
+)
+export default service;

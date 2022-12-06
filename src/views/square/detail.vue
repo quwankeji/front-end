@@ -10,12 +10,12 @@
           <div class="compose_user">
             <el-avatar :size="30" :max="30" :src="data.userImg" />
             <div class="comment_name">
-              <el-link type="info">{{ data.invitationDetail.userId }}</el-link>
+              <el-link type="info">{{ data.invitationDetail?.userId }}</el-link>
             </div>
             <div class="location_time">
-              {{ data.invitationDetail.location }}&nbsp·&nbsp{{
+              {{ data.invitationDetail?.location }}&nbsp·&nbsp{{
                 dateFormatPipe(
-                  data.invitationDetail.updatedTime,
+                  data.invitationDetail?.updatedTime,
                   "YYYY-MM-DD HH:mm"
                 )
               }}
@@ -25,16 +25,16 @@
           <div class="comment_content">
             <!-- 文字部分 -->
             <p class="text">
-              {{ data.invitationDetail.commentText }}
+              {{ data.invitationDetail?.commentText }}
             </p>
             <!-- 图片 -->
             <div
               class="demo-image__preview"
-              v-if="data.invitationDetail.imagesList.length > 0"
+              v-if="data.invitationDetail?.imagesList.length > 0"
             >
               <div
                 class="image_item"
-                v-for="(url, index) in data.invitationDetail.imagesList"
+                v-for="(url, index) in data.invitationDetail?.imagesList"
                 :key="url.id + index"
               >
                 <el-image
@@ -55,22 +55,21 @@
             <!-- 视频 -->
           </div>
           <div class="bottom_function">
-            <div class="opt-item">
-              <el-icon><Pointer /></el-icon>
-
-              <span>{{ data.invitationDetail.likesList.length }}</span>
-            </div>
-            <div class="opt-item">
-              <el-icon><ChatSquare /></el-icon>
-
-              <span>{{ data.invitationDetail.commentsList.length }}</span>
-            </div>
-            <div class="opt-item">
-              <el-icon><Star /></el-icon>
-
-              <span>0</span>
-            </div>
+          <div class="opt-item" @click.stop="pointLike( data.invitationDetail)">
+            <el-icon :class="{ active:  data.invitationDetail?.userLikeStatus }"
+              ><Pointer
+            /></el-icon>
+            <span>{{ data.invitationDetail?.likesList.length }}</span>
           </div>
+          <div class="opt-item">
+            <el-icon><ChatSquare /></el-icon>
+            <span>{{  data.invitationDetail?.commentsList.length }}</span>
+          </div>
+          <div class="opt-item">
+            <el-icon :class="{ active:  data.invitationDetail?.userLikeStatu }"><Star /></el-icon>
+            <span>23</span>
+          </div>
+        </div>
         </div>
       </div>
       <div class="padding border comment_active">
@@ -83,7 +82,7 @@
               v-model="data.addData.commentText"
               :autosize="{ minRows: 2, maxRows: 4 }"
               maxlength="100"
-                show-word-limit
+              show-word-limit
               type="textarea"
               resize="none"
               placeholder="写评论..."
@@ -96,11 +95,11 @@
       </div>
       <div
         class="border comment_list_box"
-        v-if="data.invitationDetail.commentsList.length > 0"
+        v-if="data.invitationDetail?.commentsList.length > 0"
       >
         <div
           class="comment_list_item padding"
-          v-for="(item, index) in data.invitationDetail.commentsList"
+          v-for="(item, index) in data.invitationDetail?.commentsList"
           :key="item.id + index"
         >
           <div class="compose_user">
@@ -199,6 +198,7 @@ import { ElMessage, ElMessageBox } from "element-plus";
 import type { UploadProps, UploadUserFile } from "element-plus";
 import { useRoute, useRouter } from "vue-router";
 import { dateFormatPipe } from "@/util/index";
+import request from "@/http/request"; // 引入封装的request.js文件
 import { userInfo } from "@/state/user";
 
 import axios from "axios";
@@ -260,32 +260,93 @@ const upLoad = {
     }
   },
 };
+//------------获取详情part
 const getDetail = () => {
   data.id = route.query.id;
   data.loading = true;
-  axios.get(`/business/tags/get/${data.id}`).then(function (res) {
-    data.invitationDetail = res.data;
-      data.loading = false;
-  });
+  request({
+    url: `/business/tags/get/${data.id}`,
+    method: "get",
+  })
+    .then((res: any) => {
+        data.invitationDetail = res;
+        data.loading = false;
+    })
+    .catch((err) => {
+      ElMessage({
+        message: err.error_description,
+        type: "error",
+      });
+    });
+};
+//------------点赞part
+const pointLike = (item: any) => {
+  console.log(item)
+  if (item.userLikeStatus === 1) {
+    request({
+      url: `/business/like/delete?tagId=${item.id}`,
+      method: "delete",
+    })
+      .then((res: any) => {
+          item.likesList.pop();
+          item.userLikeStatus = null;
+      })
+      .catch((err) => {
+        ElMessage({
+          message: err.error_description,
+          type: "error",
+        });
+      });
+  } else {
+    request({
+      url: `/business/like/add`,
+      method: "post",
+      data: {
+        statuType: 0, //0点赞  1取消点赞
+        tagId: item.id,
+      },
+    })
+      .then((res: any) => {
+          item.userLikeStatus = 1;
+          item.likesList.push({});
+      })
+      .catch((err) => {
+        ElMessage({
+          message: err.error_description,
+          type: "error",
+        });
+      });
+  }
 };
 //------------发表评论part
 const commentFun = () => {
   data.loading = true;
-  axios
-    .post("/business/comment/add", {
+  request({
+    url: `/business/comment/add`,
+    method: "post",
+    data: {
       commentText: data.addData.commentText,
       parentId: null,
       tagId: data.id,
       userId: userInfo.userId,
-    })
-    .then(function (res) {
-      if (res.status === 200) {
+    },
+  })
+    .then((res: any) => {
+      data.loading = false;
+      if (res) {
         getDetail();
         ElMessage({
           message: "发布成功",
           type: "success",
         });
       }
+    })
+    .catch((err) => {
+      data.loading = false;
+      ElMessage({
+        message: err.error_description,
+        type: "error",
+      });
     });
 };
 //------------删除评论part
@@ -294,16 +355,31 @@ const deleteComment = (id: any) => {
     confirmButtonText: "确定",
     cancelButtonText: "取消",
   }).then(() => {
-  data.loading = true;
-    axios.delete(`/business/comment/${id}`).then(function (res) {
-      getDetail();
-      ElMessage({
-        message: "删除成功",
-        type: "success",
+    data.loading = true;
+    request({
+      url: `/business/comment/${id}`,
+      method: "delete"
+    })
+      .then((res: any) => {
+        data.loading = false;
+        if (res) {
+          getDetail();
+          ElMessage({
+            message: "删除成功",
+            type: "success",
+          });
+        }
+      })
+      .catch((err) => {
+        data.loading = false;
+        ElMessage({
+          message: err.error_description,
+          type: "error",
+        });
       });
-    });
   });
 };
+//------------返回上级part
 const back = () => {
   router.go(-1);
 };

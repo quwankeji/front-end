@@ -1,6 +1,17 @@
 <template>
   <div class="main">
-    <router-view/>
+    <!-- 侧边栏 -->
+    <sideBar /> 
+
+    <div class="content-wrap">
+      <router-view class="app-wrap" v-slot="{ Component }">
+        <keep-alive>
+          <component v-if="$route.meta.keepAlive" :is="Component" />
+        </keep-alive>
+        <component v-if="!$route.meta.keepAlive" :is="Component" />
+      </router-view>
+    </div>
+    <rightBar />
   </div>
 </template>
 <script>
