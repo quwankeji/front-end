@@ -2,7 +2,7 @@
   <div class="content-wrap">
     <div class="square_header border">
       <el-icon @click="back()"><ArrowLeft /></el-icon>
-      <span> 趣玩详情</span>
+      <span> 组队详情</span>
     </div>
     <div class="content" v-loading="data.loading">
       <div class="padding border comment_item">
@@ -28,8 +28,27 @@
           <!-- 主要内容 -->
           <div class="comment_content">
             <!-- 文字部分 -->
+            <p class="title">{{ data.invitationDetail?.title }}</p>
+
             <p class="text">
-              {{ data.invitationDetail?.content }}
+              <label>人数：</label> {{ data.invitationDetail?.peopleNum }}
+            </p>
+            <p class="text">
+              <label>时间：</label
+              >{{
+                dateFormatPipe(
+                  data.invitationDetail?.startTime,
+                  "YYYY-MM-DD HH:mm"
+                )
+              }}&nbsp至&nbsp{{
+                dateFormatPipe(
+                  data.invitationDetail?.endTime,
+                  "YYYY-MM-DD HH:mm"
+                )
+              }}
+            </p>
+            <p class="text">
+              <label>内容：</label> {{ data.invitationDetail?.content }}
             </p>
             <!-- 图片 -->
             <div
@@ -62,33 +81,28 @@
             <!-- 视频 -->
           </div>
           <div class="bottom_function">
+            <div class="opt-item" @click.stop="joinTeam(data.invitationDetail)">
+
+              <n-icon size="20" :title="data.invitationDetail?.userTeamStatus?'取消加入':'加入组队'">
+                <people-team-add-24-regular v-if="!data.invitationDetail?.userTeamStatus" />
+                <people-team-32-filled v-if="data.invitationDetail?.userTeamStatus" color="#63e2b7" />
+              </n-icon>
+            </div>
             <div
               class="opt-item"
-              @click.stop="pointLike(1, data.invitationDetail)"
+              @click.stop="pointLike(2, data.invitationDetail)"
             >
-            <n-icon size="20">
-                <like-outlined v-if="!data.invitationDetail?.userLikeStatus"></like-outlined>
-                <like-filled
-                  v-if="data.invitationDetail?.userLikeStatus"
-                  color="#f56c6c"
-                ></like-filled>
-              </n-icon>
-              <span>{{
-                data.invitationDetail?.likesList &&
-                data.invitationDetail?.likesList.length
-              }}</span>
-            </div>
-            <div class="opt-item">
               <n-icon size="20">
-                <comment-20-regular></comment-20-regular>
+                <heart-outline v-if="!data.invitationDetail?.userLikeStatus" />
+                <heart v-if="data.invitationDetail?.userLikeStatus" color="#f56c6c" />
               </n-icon>
-              <span>{{ data.invitationDetail?.commentsList.length }}</span>
+              <span>{{data.invitationDetail?.likesList.length }}</span>
             </div>
             <div
               class="opt-item"
-              @click.stop="pointStar(1, data.invitationDetail)"
+              @click.stop="pointStar(2, data.invitationDetail)"
             >
-            <n-icon size="20">
+              <n-icon size="20">
                 <star-12-regular
                   v-if="!data.invitationDetail?.userFavoriteStatus"
                 ></star-12-regular>
@@ -112,7 +126,7 @@
           </div>
           <div class="compose_textarea">
             <el-input
-              v-model.trim="data.addData.commentText"
+              v-model="data.addData.commentText"
               :autosize="{ minRows: 2, maxRows: 4 }"
               maxlength="100"
               show-word-limit
@@ -236,12 +250,13 @@ import type { UploadProps, UploadUserFile } from "element-plus";
 import { useRoute, useRouter } from "vue-router";
 import { dateFormatPipe } from "@/util/index";
 import request from "@/http/request"; // 引入封装的request.js文件
-import { pointStar, pointLike } from "@/util/common.ts";
-import { userInfo } from "@/util/user";
+import { pointStar, pointLike, joinTeam } from "@/util/common.ts";
 import { NIcon } from "naive-ui";
-import { ImageOutline } from "@vicons/ionicons5";
+import { ImageOutline, HeartOutline, Heart } from "@vicons/ionicons5";
 import { LikeFilled, LikeOutlined } from "@vicons/antd";
-import { Comment20Regular, Star12Regular, Star12Filled } from "@vicons/fluent";
+import { Comment20Regular, Star12Regular, Star12Filled,PeopleTeamAdd24Regular,PeopleTeam32Filled } from "@vicons/fluent";
+import { userInfo } from "@/util/user";
+
 import axios from "axios";
 import video from "@/assets/video/a.mp4";
 import { start } from "@popperjs/core";
@@ -310,6 +325,7 @@ const getDetail = () => {
     loading: true,
   })
     .then((res: any) => {
+      console.log("res", res);
       data.invitationDetail = res;
       data.loading = false;
     })
@@ -329,17 +345,11 @@ const addTag = (item: any) => {
 
 //------------发表评论part
 const commentFun = () => {
-  if (data.addData.commentText === "") {
-    return ElMessage({
-      message: "评论内容不能为空",
-      type: "warning",
-    });
-  }
   let params: any = {
     commentText: data.addData.commentText,
     parentId: null,
     tagId: data.id,
-    tagType: 1, ///朋友圈1、组队2
+    tagType: 2, ///朋友圈1、组队2
     userId: userInfo.id,
   };
   request({

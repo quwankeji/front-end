@@ -22,7 +22,11 @@
   .comment_item {
     background: #18181c;
     height: auto;
+    padding-bottom: 20px;
 
+    .list_item {
+      border: none;
+    }
   }
   .comment_active {
     position: relative;
@@ -54,6 +58,13 @@
         .left {
           display: flex;
         }
+        .right{
+          display: flex;
+          align-items: center;
+          .delete{
+            margin-left: 10px;
+          }
+        }
         .comment_name {
           margin-left: 10px;
         }
@@ -72,12 +83,13 @@
         // .location{
         //     margin-left: 5px;
         // }
-        .reply{
-            cursor: pointer;
-            color: #18a058;
-            margin-left: 20px;
-        }
+     
       }
+      .reply{
+        cursor: pointer;
+        color: #18a058;
+        margin-left: 20px;
+    }
       .bottom_reply{
         width: 100%;
         background: #18181c;

@@ -1,182 +1,225 @@
 <template>
-  <el-dialog :destroy-on-close="true" v-model="data.userVisible" :width="360"  @close="onClose">
-  <div class="user_box">
-    <el-menu
-      :default-active="data.activeIndex"
-      class="el-menu-demo"
-      mode="horizontal"
-      @select="handleSelect"
-    >
-      <el-menu-item index="1">登录</el-menu-item>
-      <el-menu-item index="2">注册</el-menu-item>
-    </el-menu>
-    <el-form
-      ref="loginForm"
-      :model="data.formData"
-      :rules="data.rules"
-      label-width="80px"
-    >
-      <el-form-item label="账号" prop="username">
-        <el-input
-          v-model="data.formData.username"
-          :placeholder="
-            data.activeIndex == '1' ? '请输入用户名' : '用户名注册后无法修改'
-          "
+  <div class="content-wrap">
+    <div class="square_header border">
+      <span> 个人中心</span>
+    </div>
+    <div class="comment_item border">
+      <div class="list_item padding user-info">
+        <div class="title">基本信息</div>
+        <!-- {{store.getters.getUserInfo}} -->
+       
+        <el-image
+          style="width: 100px; height: 100px"
+          :src="store.getters.getUserInfo.portrait"
+          :fit="true"
         />
-      </el-form-item>
-      <el-form-item label="密码" prop="password">
-        <el-input
-          v-model.trim="data.formData.password"
-          type="password"
-          placeholder="请输入密码"
-          show-password
-        />
-      </el-form-item>
-      <el-form-item
-        v-if="data.activeIndex == '2'"
-        label="确认密码"
-        prop="surePassword"
-      >
-        <el-input
-          v-model.trim="data.formData.surePassword"
-          type="password"
-          placeholder="请再次输入密码"
-          show-password
-        />
-      </el-form-item>
-    </el-form>
-    <el-form-item>
-      <el-button class="user_btn" type="primary" @click="onSubmit(loginForm)"
-        >提交</el-button
-      >
-    </el-form-item>
+        <p class="head-image">
+          <el-upload
+          ref="headUpload"
+          class="upload"
+          :action="'/file/path'"
+          :accept="upLoad.accept"
+          :before-upload="(file:any) => upLoad.handleBeforeUpload(file, upLoad.accept)"
+          :on-success="upLoad.handleSuccess"
+          :limit="1"
+          :on-exceed="handleExceed"
+          :file-list="data.fileList"
+          :headers="{ Authorization: `Bearer ${getToken()}` }"
+        >
+        <el-button>更改头像</el-button>
+        </el-upload>
+       </p>
+        <p>
+          <span class="base-label">用户名：</span>
+          <el-input
+            v-if="data.editName"
+            v-model.trim="data.userName"
+            @blur="set('name', data.userName, 'editName')"
+            :placeholder="store.getters.getUserInfo.name"
+          />
+          <span v-if="!data.editName">{{
+            store.getters.getUserInfo.name
+          }}</span>
+          <el-icon @click="data.editName = !data.editName"><Edit /></el-icon>
+        </p>
+        <p>
+          <span class="base-label">性别：</span>
+          {{ store.getters.getUserInfo.sex }}
+          <!-- <el-input
+            v-if="data.editSex"
+            v-model="data.sex"
+            @blur="set('sex', data.sex,'editSex')"
+            :placeholder="store.getters.getUserInfo.sex"
+          />
+          <span v-if="!data.editSex">{{ store.getters.getUserInfo.sex }}</span>
+          <el-icon @click="data.editSex = !data.editSex"><Edit /></el-icon> -->
+        </p>
+        <!-- <p>
+          <span class="base-label">手机号：</span
+          >
+          <el-input
+            v-if="data.editPhone"
+            v-model.trim="data.phone"
+            @blur="set('phone', data.phone, 'editPhone')"
+            :placeholder="store.getters.getUserInfo.phone"
+          />
+          <span v-if="!data.editPhone">{{
+            store.getters.getUserInfo.phone
+          }}</span>
+          <el-icon @click="data.editPhone = !data.editPhone"><Edit /></el-icon>
+        </p> -->
+        <p>
+          <span class="base-label">个性签名：</span
+          >
+          <el-input
+            style="width: 250px;"
+            v-if="data.editSignature"
+            v-model.trim="data.signature"
+            @blur="set('signature', data.signature, 'editSignature')"
+            :placeholder="store.getters.getUserInfo.signature"
+          />
+          <span v-if="!data.editSignature">{{
+            store.getters.getUserInfo.signature
+          }}</span>
+          <el-icon @click="data.editSignature = !data.editSignature"><Edit /></el-icon>
+        </p>
+      </div>
+    </div>
   </div>
-</el-dialog>
 </template>
 
 <script lang="ts" setup>
-import { reactive, ref ,onMounted} from "vue";
+import { reactive, ref, onMounted } from "vue";
 import axios from "axios";
 import type { FormInstance, FormRules } from "element-plus";
-import { ElMessage, ElMessageBox } from "element-plus";
+import { ElMessage, ElMessageBox,UploadInstance, UploadProps, UploadRawFile,genFileId  } from "element-plus";
 import request from "@/http/request"; // 引入封装的request.js文件
-import {getUserInfo,getRongyunToken} from "@/util/user"; // 引入封装的request.js文件
-import { fa } from "element-plus/es/locale";
-
-const loginForm = ref<FormInstance>();
-const data = reactive({
-  userVisible:false,
-  formData: {
-    grant_type: "password",
-    client_id: "client-app",
-    client_secret: "123456",
-    username: "",
-    password: "",
-    surePassword: "",
-  },
-  activeIndex: "1",
-  rules: {
-    username: [{ required: true, message: "请输入账号", trigger: "blur" }],
-    password: [{ required: true, message: "请输入密码", trigger: "blur" }],
-    surePassword: [
-      { required: true, message: "请输入确认密码", trigger: "blur" },
-    ],
-  },
+import { requestUserInfoById } from "@/util/user"; // 引入封装的request.js文件
+import { getToken } from "@/util/user";
+import { useStore } from "vuex";
+const store = useStore();
+const headUpload = ref<UploadInstance>()
+const data: any = reactive({
+  userName: "",
+  sex: "",
+  phone: "",
+  signature: "",
+  portrait:"",
+  editName: false,
+  editSex: false,
+  editPhone: false,
+  editSignature: false,
 });
-//------------切换part
-const handleSelect = (key, keyPath) => {
-  data.activeIndex = key;
-  data.formData.username = "";
-  data.formData.password = "";
-};
-//------------登录或注册part
-const onSubmit = async (formEl: FormInstance | undefined) => {
-  if (!formEl) return;
-  await formEl.validate((valid, fields) => {
-    if (valid) {
-      let url = `/oauth/token`;
-      let msg = "登录成功";
-      let headers:any = { "Content-Type": "application/x-www-form-urlencoded" };
-      let params:any = Object.assign({},data.formData)
-      if (data.activeIndex !== "1") {
-        if (data.formData.password !== data.formData.surePassword) {
-          return ElMessage({
-            message: "密码和确认密码不一致！",
-            type: "warning",
-          });
-        }
-        headers={};
-        url = `/user/register`;
-        msg = "注册成功";
-        params = {
-         name: data.formData.username,
-         password: data.formData.password, 
-        }
-        
-      }
-      request({
-        url: url,
-        method: "post",
-        data: params,
-        headers
-      })
-        .then((res: any) => {
-          if(res&&res.access_token){
-            localStorage.setItem('token',res.access_token)
-            getRongyunToken()
-             getUserInfo({
-              name: data.formData.username,
-             password: data.formData.password, 
-             })
-          }
-          ElMessage({
-            message: msg,
-            type: "success",
-          });
-          onClose()
-        })
-        .catch((err) => {
-            ElMessage({
-                message:err,
-                type: 'error'
-            });
-        });
-    }
-  });
-};
-const onClose=()=>{
-  data.userVisible = false;
+//------------文件上传part
+const handleExceed: UploadProps['onExceed'] = (files) => {
+  headUpload.value!.clearFiles()
+  const file = files[0] as UploadRawFile
+  file.uid = genFileId()
+  headUpload.value!.handleStart(file)
+  submitUpload()
 }
-
-// 将变量暴露出来
-defineExpose({
-  data
-})
+const submitUpload = () => {
+  headUpload.value!.submit()
+}
+const upLoad = {
+  accept: "image/jpg,image/jpeg,image/png,video/mp4",
+  handleBeforeUpload: (file: any, accept: any) => {
+    let validateList: any = [];
+    accept.split(",").forEach((item: any) => {
+      validateList.push(item.split("/")[1]);
+    });
+    var fileSuffix = file.name.substring(file.name.lastIndexOf(".") + 1);
+    if (validateList.indexOf(fileSuffix) === -1) {
+      ElMessage({
+        message: `请上传${accept}格式的图片`,
+        type: "warning",
+      });
+      return false;
+    }
+  },
+  handleSuccess: (response: any, file: any, fileList: any) => {
+    if (response.success && fileList.length > 0) {
+      data.portrait = fileList?.[0]?.response?.data;
+      set('portrait',data.portrait)
+    }
+  },
+};
+const set = (str: any, val: any, val2: any) => {
+  request({
+    url: `/user/update`,
+    method: "PUT",
+    data: {
+      [str]: val,
+    },
+    loading: true,
+  })
+    .then((res: any) => {
+      // store.getters.getUserInfo.name = data.userName;
+      data[val2] = false;
+      requestUserInfoById(store.getters.getUserInfo.id, () => {
+        store.commit("setUserInfo");
+      });
+      ElMessage({
+        message: "修改成功",
+        type: "success",
+      });
+    })
+    .catch((err) => {
+      ElMessage({
+        message: err,
+        type: "error",
+      });
+    });
+};
 </script>
 <style lang="less" scoped>
-.user_box {
-  margin-top: -22px;
-  .el-menu {
-    margin-bottom: 20px;
+@import "@/assets/css/common/invitation.less";
+.content-wrap {
+  .comment_item {
+  height: calc(100% - 116px);
+}
+
+.title {
+  height: 34px;
+  line-height: 34px;
+  font-size: 16px;
+}
+::v-deep .user-info {
+  .head-image{
+    width: 100px;
     display: flex;
-    justify-content: space-around;
-    .el-form-item {
-      margin-bottom: 25px;
-      &.is-active {
-        border-bottom: 2px solid #18a058;
-        color: #18a058;
-      }
+    justify-content: center;
+    margin-top: 10px;
+    margin-bottom: 30px;
+    .el-button{
+      background: transparent;
+    color: #fff;
+    &:hover{
+      border: 1px solid #63e2b7;
+      color: #63e2b7;
+    }
     }
   }
-  .user_btn {
-    width: 100%;
-    cursor: pointer;
-    border: none;
-    color: #18a058;
-    background: rgba(24, 160, 88, 0.16);
-    &:hover {
-      background: rgba(24, 160, 88, 0.22);
+  > p {
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    .el-input {
+      width: 140px;
     }
+    .el-icon {
+      margin-left: 10px;
+      color: #63e2b7;
+    }
+    .base-label {
+      margin-right: 5px;
+      opacity: 0.75;
+    }
+  }
+  .el-upload-list{
+    display: none;
   }
 }
+}
+
 </style>

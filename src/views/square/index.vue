@@ -1,11 +1,11 @@
 <template>
   <div class="main">
     <!-- 侧边栏 -->
-    <sideBar />
+    <!-- <sideBar /> -->
     <div class="content-wrap">
       <square />
     </div>
-    <rightBar />
+    <!-- <rightBar /> -->
   </div>
 </template>
 <script>

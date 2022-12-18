@@ -10,9 +10,10 @@ import VueLazyload from "vue-lazyload";
 import VideoPlay from 'vue3-video-play' 
 import VuemoothScroll from "vue-smooth-scroll";//隐藏滚动条
 import router from "./router/index"
+import store from './store/user'
 import App from './App.vue'
 const app = createApp(App)
 for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
     app.component(key, component)
   }
-app.use(ElementPlus).use(VuemoothScroll).use(VueLazyload).use(VideoPlay).use(router).mount('#app')
+app.use(ElementPlus).use(VuemoothScroll).use(VueLazyload).use(VideoPlay).use(router).use(store).mount('#app')

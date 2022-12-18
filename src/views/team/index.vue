@@ -5,35 +5,29 @@
       <el-icon class="addTeam" @click="addTeam" title="发起组队"
         ><Plus /></el-icon>
     </div>
-    <div class="compose_comment  border">
-    </div>
     <div
-      class="comment_item"
-      v-infinite-scroll="getList"
-      :infinite-scroll-disabled="data.listItem.loading"
-      :infinite-scroll-immediate="true"
-      infinite-scroll-distance="20"
-      v-loading="data.loading"
+      class="comment_item border"
     >
+    <div class="list_item_box">
       <div
-        class="list_item padding border"
-        @click="toDetail(item.id)"
+        class="list_item padding"
         v-for="(item, index) in data.listItem.invitationList"
         :key="item.id + index"
+        @click="toDetail(item.id)"
       >
         <div class="compose_user">
-          <el-avatar :size="30" :max="30" :src="data.userImg" />
+          <el-avatar :size="30" :max="30" :src="item.portrait" />
           <div class="comment_name">
-            <el-link type="info">{{ item.userName }}</el-link>
+            <el-link type="info">{{ item.name }}</el-link>
           </div>
           <div class="location_time">
             {{ item.location }}&nbsp·&nbsp{{
-              dateFormatPipe(item.updatedTime, "YYYY-MM-DD HH:mm")
+              dateFormatPipe(item.createdTime, "MM-DD HH:mm")
             }}
             <el-icon
               class="delete"
               @click.stop="deleteInvitation(item.id)"
-              v-if="item.userId === userInfo?.userId"
+              v-if="item.userId === userInfo?.id"
               ><DeleteFilled
             /></el-icon>
           </div>
@@ -41,8 +35,15 @@
         <!-- 主要内容 -->
         <div class="comment_content">
           <!-- 文字部分 -->
+          <p class="title">{{ item.title }}</p>
           <p class="text">
-            {{ item.content }}
+           <label>人数：</label> {{ item.peopleNum }}
+          </p>
+          <p class="text">
+            <label>时间：</label>{{   dateFormatPipe(item.startTime, "YYYY-MM-DD HH:mm") }}&nbsp至&nbsp{{ dateFormatPipe(item.endTime, "YYYY-MM-DD HH:mm")}}
+          </p>
+          <p class="text">
+            <label>内容：</label> {{ item.content }}
           </p>
           <!-- 图片 -->
           <div class="demo-image__preview" v-if="item.imagesList.length > 0">
@@ -70,36 +71,62 @@
           <!-- 视频 -->
         </div>
         <div class="bottom_function">
-          <div class="opt-item" @click.stop="pointLike(item)">
-            <el-icon :class="{ active: item.userLikeStatus }"
-              ><Pointer
-            /></el-icon>
-            <span>{{ item.likesList?.length }}</span>
+          <div class="opt-item"   @click.stop="joinTeam(item)">
+            <n-icon size="20" :title="item.userTeamStatus?'取消加入':'加入组队'">
+                <people-team-add-24-regular v-if="!item.userTeamStatus" />
+                <people-team-32-filled v-if="item.userTeamStatus" color="#63e2b7" />
+              </n-icon>
           </div>
-          <div class="opt-item">
-            <el-icon><ChatSquare /></el-icon>
-            <span>{{ item.commentsList?.length }}</span>
+          <div class="opt-item"  @click.stop="pointLike(2,item)">
+            <n-icon size="20">
+                <heart-outline v-if="!item.userLikeStatus" />
+                <heart v-if="item.userLikeStatus" color="#f56c6c" />
+              </n-icon>
+              <span>{{ item.likesList.length }}</span>
           </div>
-          <div class="opt-item">
-            <el-icon :class="{ active: item.userLikeStatu }"><Star /></el-icon>
-            <span>23</span>
+          <div class="opt-item" @click.stop="pointStar(2,item)">
+            <n-icon size="20">
+                <star-12-regular
+                  v-if="!item.userFavoriteStatus"
+                ></star-12-regular>
+                <star-12-filled
+                  v-if="item.userFavoriteStatus"
+                  color="#ff7600"
+                ></star-12-filled>
+              </n-icon>
           </div>
         </div>
       </div>
     </div>
+    <el-pagination
+        :hide-on-single-page="data.listItem.invitationList.length === 0"
+        :page-sizes="[10, 15, 20, 25]"
+        layout="prev, pager, next"
+        :total="data.listItem.total"
+        :default-page-size="data.listItem.pageSize"
+        @size-change="handleSizeChange"
+        @current-change="handleCurrentChange"
+      />
+  </div>
   </div>
     <InitiateTeam ref="addTeamDialog" :getList="getList" />
 </template>
 
 <script lang="ts" setup>
-import { ref, reactive, toRefs } from "vue";
+import { ref, reactive, toRefs,onMounted } from "vue";
 import { useRouter } from "vue-router";
 import { ElMessage, ElMessageBox } from "element-plus";
 import { dateFormatPipe } from "@/util/index";
-import { userInfo } from "@/state/user";
+import { userInfo} from "@/util/user";
 import request from "@/http/request"; // 引入封装的request.js文件
+import { pointStar, pointLike,joinTeam } from "@/util/common.ts";
+import { NIcon } from "naive-ui";
+import { ImageOutline, HeartOutline, Heart } from "@vicons/ionicons5";
+import { LikeFilled, LikeOutlined } from "@vicons/antd";
+import { Comment20Regular, Star12Regular, Star12Filled,PeopleTeamAdd24Regular,PeopleTeam32Filled } from "@vicons/fluent";
+
 import InitiateTeam from "@/components/team/InitiateTeam.vue";
-const addTeamDialog = ref(null)
+const addTeamDialog:any = ref(null)
 
 const router = useRouter();
 const data = reactive({
@@ -111,9 +138,10 @@ const data = reactive({
   
   listItem: {
     pageNum: 1,
-    pageSize: 10,
+    pageSize: 20,
     initLoading: true,
     loading: false,
+    total:0,
     invitationList: [] as any,
   },
 });
@@ -121,10 +149,16 @@ const data = reactive({
 const addTeam = () => {
   addTeamDialog.value.data.visible = true
 };
+const handleSizeChange = (val: number) => {
+  data.listItem.pageSize = val;
+  getList();
+};
+const handleCurrentChange = (val: number) => {
+  data.listItem.pageNum = val;
+  getList();
+};
 //------------获取列表part
 const getList = () => {
-  data.loading = true;
-  data.listItem.loading = true;
   request({
     url: `/business/tags/get/page`,
     method: "post",
@@ -133,17 +167,15 @@ const getList = () => {
       pageSize: data.listItem.pageSize,
       tagType:2
     },
+    loading:true
+
   })
     .then((res: any) => {
-      data.loading = false;
       if (res && res.list.length > 0) {
         data.listItem.invitationList = [...res.list];
       }
-      data.listItem.pageNum++;
-      // if (data.listItem.pageNum <= 10) {
-      //   data.listItem.loading = false;
-      //   return;
-      // }
+      data.listItem.total = res.total;
+   
     })
     .catch((err) => {
       ElMessage({
@@ -153,68 +185,7 @@ const getList = () => {
             });
     });
 };
-//------------点赞part
-const pointLike = (item: any) => {
-  if (item.userLikeStatus === 1) {
-    request({
-      url: `/business/like/delete?tagId=${item.id}`,
-      method: "delete",
-    })
-      .then((res: any) => {
-          data.listItem.pageNum = 1;
-          item.likesList.pop();
-          item.userLikeStatus = null;
-      })
-      .catch((err) => {
-        ElMessage({
-          message: err.error_description,
-          type: "error",
-        });
-      });
-  } else {
-    request({
-      url: `/business/like/add`,
-      method: "post",
-      data: {
-        statuType: 0, //0点赞  1取消点赞
-        tagId: item.id,
-      },
-    })
-      .then((res: any) => {
-          data.listItem.pageNum = 1;
-          item.userLikeStatus = 1;
-          item.likesList.push({});
-      })
-      .catch((err) => {
-        ElMessage({
-          message: err.error_description,
-          type: "error",
-        });
-      });
-  }
-};
-//------------评论part
-const commentFun = (item: any) => {
-  request({
-    url: `/business/comment/add`,
-    method: "post",
-    data: {
-      comment: 0, //0点赞  1取消点赞
-      parentId: null,
-      tagId: item.id,
-    },
-  })
-    .then((res: any) => {
-        data.listItem.pageNum = 1;
-        getList();
-    })
-    .catch((err) => {
-      ElMessage({
-        message: err.error_description,
-        type: "error",
-      });
-    });
-};
+
 //------------删除帖子part
 const deleteInvitation = (val: any) => {
   ElMessageBox.confirm("您确定要删除该帖子吗?", {
@@ -224,6 +195,8 @@ const deleteInvitation = (val: any) => {
     request({
       url: `/business/tags/delete/${val}`,
       method: "delete",
+    loading:true
+
     })
       .then((res: any) => {
           data.listItem.pageNum = 1;
@@ -235,7 +208,7 @@ const deleteInvitation = (val: any) => {
       })
       .catch((err) => {
         ElMessage({
-          message: err.error_description,
+          message: err,
           type: "error",
         });
       });
@@ -244,15 +217,30 @@ const deleteInvitation = (val: any) => {
 //------------跳转详情页part
 const toDetail = (val: any) => {
   router.push({
-    path: "/square/detail",
+    path: "/team/teamDetail",
     query: {
       id: val,
     },
   });
 };
+
+onMounted(() => {
+  getList();
+});
 </script>
 
 <style lang="less" scoped>
 @import "@/assets/css/square/square.less";
 @import "@/assets/css/common/invitation.less";
+.content-wrap {
+  .comment_item{
+ 
+height:  calc(100% - 118px);
+overflow-y: auto;
+.list_item_box{
+  height:  100%;
+overflow-y: auto;
+}
+  }
+}
 </style>

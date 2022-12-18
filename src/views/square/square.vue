@@ -1,134 +1,156 @@
 <template>
-  <div class="content-wrap">
-    <div class="square_header border">
+  <div class="content-wrap border">
+    <div class="square_header">
       趣玩广场
       <el-icon class="chat" @click="openChat" title="消息会话"
         ><ChatRound
       /></el-icon>
     </div>
-    <div class="compose_comment padding border">
-      <div class="top_input">
-        <div class="compose_user">
-          <el-avatar :size="30" :max="30" :src="data.userImg" />
-        </div>
-        <div class="compose_textarea">
-          <!-- <el-input
+    <div class="comment_item">
+      <div class="compose_comment padding">
+        <div class="top_input">
+          <div class="compose_user">
+            <el-avatar
+              :size="30"
+              :max="30"
+              :src="store.getters.getUserInfo?.portrait"
+            />
+          </div>
+          <div class="compose_textarea">
+            <!-- <el-input
             class="title"
             v-model="data.addData.title"
             type="text"
             placeholder="标题"
           /> -->
-          <el-input
-            v-model="data.addData.content"
-            :autosize="{ minRows: 2, maxRows: 4 }"
-            type="textarea"
-            resize="none"
-            placeholder="说说您的新鲜事..."
-          />
-        </div>
-      </div>
-      <div class="link_upload">
-        <el-upload
-          class="upload"
-          :action="'/file/path'"
-          :accept="upLoad.accept"
-          :before-upload="(file:any) => upLoad.handleBeforeUpload(file, upLoad.accept)"
-          :on-success="upLoad.handleSuccess"
-          :file-list="data.fileList"
-        >
-          <el-icon :size="20" :color="'rgb(99,226,183)'"><Document /></el-icon>
-          <template #tip>
-            <div v-if="data.fileList.length == 0" class="el-upload__tip">
-              仅支持上传图片和视频文件。
-            </div>
-          </template>
-        </el-upload>
-        <!-- <el-icon :size="20" :color="'rgb(99,226,183)'"><Link /></el-icon> -->
-      </div>
-      <div class="fb">
-        <el-button type="primary" @click="addTag">发布</el-button>
-      </div>
-    </div>
-    <div
-      class="comment_item"
-      v-infinite-scroll="getList"
-      :infinite-scroll-disabled="data.listItem.loading"
-      :infinite-scroll-immediate="true"
-      infinite-scroll-distance="20"
-      v-loading="data.loading"
-    >
-      <div
-        class="list_item padding border"
-        @click="toDetail(item.id)"
-        v-for="(item, index) in data.listItem.invitationList"
-        :key="item.id + index"
-      >
-        <div class="compose_user">
-          <el-avatar :size="30" :max="30" :src="data.userImg" />
-          <div class="comment_name">
-            <el-link type="info">{{ item.name }}</el-link>
-          </div>
-          <div class="location_time">
-            {{ item.location }}&nbsp·&nbsp{{
-              dateFormatPipe(item.updatedTime, "YYYY-MM-DD HH:mm")
-            }}
-            <el-icon
-              class="delete"
-              @click.stop="deleteInvitation(item.id)"
-              v-if="(item.userId === userInfo?.id)"
-              ><DeleteFilled
-            /></el-icon>
+            <el-input
+              v-model.trim="data.addData.content"
+              :autosize="{ minRows: 2, maxRows: 4 }"
+              type="textarea"
+              resize="none"
+              placeholder="说说您的新鲜事..."
+            />
           </div>
         </div>
-        <!-- 主要内容 -->
-        <div class="comment_content">
-          <!-- 文字部分 -->
-          <p class="text">
-            {{ item.content }}
-          </p>
-          <!-- 图片 -->
-          <div class="demo-image__preview" v-if="item.imagesList.length > 0">
-            <div
-              class="image_item"
-              v-for="(url, index) in item.imagesList"
-              :key="url.id + index"
-              @click.stop=""
+        <div class="upload_box">
+          <div class="link_upload">
+            <el-upload
+              ref="tagUpload"
+              class="tag-upload"
+              :action="'/file/path'"
+              :accept="upLoad.accept"
+              list-type="picture"
+              :before-upload="(file:any) => upLoad.handleBeforeUpload(file, upLoad.accept)"
+              :on-success="upLoad.handleSuccess"
+              :on-remove="handleRemove"
+              :file-list="data.fileList"
+              :headers="{ Authorization: `Bearer ${getToken()}` }"
             >
-              <el-image
-                :src="url.imgUrl"
-                :preview-src-list="[url.imgUrl]"
-                :initial-index="4"
-                fit="cover"
-                lazy
-              />
+              <n-icon @click="submitUpload" size="20" color="#63e2b7">
+                <image-outline />
+              </n-icon>
+            </el-upload>
+          </div>
+          <div class="fb">
+            <el-button type="primary" @click="addTag">发布</el-button>
+          </div>
+        </div>
+      </div>
+      <div class="list_item_box">
+        <div
+          class="list_item padding"
+          @click="toDetail(item.id)"
+          v-for="(item, index) in data.listItem.invitationList"
+          :key="item.id + index"
+        >
+          <div class="compose_user">
+            <el-avatar :size="30" :max="30" :src="item.portrait" />
+            <div class="comment_name">
+              <el-link type="info">{{ item.name }}</el-link>
+            </div>
+            <div class="location_time">
+              {{ item.location }}&nbsp·&nbsp{{
+                dateFormatPipe(item.createdTime, "MM-DD HH:mm")
+              }}
+              <el-icon
+                class="delete"
+                @click.stop="deleteInvitation(item.id)"
+                v-if="item.userId === store.getters.getUserInfo?.id"
+                ><DeleteFilled
+              /></el-icon>
             </div>
           </div>
-          <div class="video">
-            <!-- <vue3VideoPlay
+          <!-- 主要内容 -->
+          <div class="comment_content">
+            <!-- 文字部分 -->
+            <p class="text">
+              {{ item.content }}
+            </p>
+            <!-- 图片 -->
+            <div class="demo-image__preview" v-if="item.imagesList.length > 0">
+              <div
+                class="image_item"
+                v-for="(url, index) in item.imagesList"
+                :key="url.id + index"
+                @click.stop=""
+              >
+                <el-image
+                  :src="url.imgUrl"
+                  :preview-src-list="[item.imagesList]"
+                  :initial-index="4"
+                  fit="cover"
+                />
+              </div>
+            </div>
+            <div class="video">
+              <!-- <vue3VideoPlay
               :src="video"
               poster="https://cdn.jsdelivr.net/gh/xdlumia/files/video-play/ironMan.jpg"
             /> -->
+            </div>
+            <!-- 视频 -->
           </div>
-          <!-- 视频 -->
-        </div>
-        <div class="bottom_function">
-          <div class="opt-item" @click.stop="pointLike(item)">
-            <el-icon :class="{ active: item.userLikeStatus }"
-              ><Pointer
-            /></el-icon>
-            <span>{{ item.likesList.length }}</span>
-          </div>
-          <div class="opt-item">
-            <el-icon><ChatSquare /></el-icon>
-            <span>{{ item.commentsList.length }}</span>
-          </div>
-          <div class="opt-item">
-            <el-icon :class="{ active: item.userLikeStatu }"><Star /></el-icon>
-            <span>23</span>
+          <div class="bottom_function">
+            <div class="opt-item" @click.stop="pointLike(1, item)">
+              <n-icon size="20">
+                <like-outlined v-if="!item.userLikeStatus"></like-outlined>
+                <like-filled
+                  v-if="item.userLikeStatus"
+                  color="#f56c6c"
+                ></like-filled>
+              </n-icon>
+              <span>{{ item.likesList.length }}</span>
+            </div>
+            <div class="opt-item">
+              <n-icon size="20">
+                <comment-20-regular></comment-20-regular>
+              </n-icon>
+              <span>{{ item.commentsList.length }}</span>
+            </div>
+            <div class="opt-item" @click.stop="pointStar(1, item)">
+              <n-icon size="20">
+                <star-12-regular
+                  v-if="!item.userFavoriteStatus"
+                ></star-12-regular>
+                <star-12-filled
+                  v-if="item.userFavoriteStatus"
+                  color="#ff7600"
+                ></star-12-filled>
+              </n-icon>
+            </div>
           </div>
         </div>
       </div>
     </div>
+    <el-pagination
+      :hide-on-single-page="data.listItem.invitationList.length === 0"
+      :page-sizes="[10, 15, 20, 25]"
+      layout="prev, pager, next"
+      :total="data.listItem.total"
+      :default-page-size="data.listItem.pageSize"
+      @size-change="handleSizeChange"
+      @current-change="handleCurrentChange"
+    />
   </div>
   <el-dialog v-model="data.dialogTableVisible" :width="1200" title="会话">
     <chat />
@@ -136,21 +158,31 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, reactive, toRefs } from "vue";
-import { useRouter } from "vue-router";
+import { ref, reactive, toRefs, onMounted } from "vue";
+import { useStore } from "vuex";
+import { useRouter, useRoute } from "vue-router";
 import { ElMessage, ElMessageBox } from "element-plus";
 import axios from "axios";
 import { dateFormatPipe } from "@/util/index";
-import { userInfo } from "@/state/user";
-import request from "@/http/request"; // 引入封装的request.js文件
+import { getToken } from "@/util/user";
+import { pointStar, pointLike } from "@/util/common.ts";
+import request from "@/http/request";
+import type { UploadInstance, UploadProps, UploadUserFile } from "element-plus";
+import { NIcon } from "naive-ui";
+import { ImageOutline } from "@vicons/ionicons5";
+import { LikeFilled, LikeOutlined } from "@vicons/antd";
+import { Comment20Regular, Star12Regular, Star12Filled } from "@vicons/fluent";
+
+Comment20Regular;
+
 import chat from "@/components/chat/index.vue";
-import video from "@/assets/video/a.mp4";
-import { tr } from "element-plus/es/locale";
+const tagUpload = ref<UploadInstance>();
 const router = useRouter();
+const route = useRoute();
+const store = useStore();
 const data = reactive({
   textarea: "",
   fileList: [],
-  loading: false,
   dialogTableVisible: false,
   userImg:
     "https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png",
@@ -163,17 +195,32 @@ const data = reactive({
   },
   listItem: {
     pageNum: 1,
-    pageSize: 10,
+    pageSize: 20,
+    total: 0,
     initLoading: true,
-    loading: false,
     invitationList: [] as any,
   },
 });
+const handleSizeChange = (val: number) => {
+  data.listItem.pageSize = val;
+  getList();
+};
+const handleCurrentChange = (val: number) => {
+  data.listItem.pageNum = val;
+  getList();
+};
 //------------聊天
 const openChat = () => {
   data.dialogTableVisible = true;
 };
 //------------文件上传part
+const handleRemove: UploadProps["onRemove"] = (uploadFile, uploadFiles) => {
+  console.log(uploadFile, uploadFiles);
+};
+
+const submitUpload = () => {
+  tagUpload.value!.submit();
+};
 const upLoad = {
   accept: "image/jpg,image/jpeg,image/png,video/mp4",
   handleBeforeUpload: (file: any, accept: any) => {
@@ -197,14 +244,21 @@ const upLoad = {
     }
   },
 };
+
 //------------发贴part
 const addTag = () => {
-  data.loading = true;
+  if (data.addData.content === "") {
+    return ElMessage({
+      message: "发布内容不能为空",
+      type: "warning",
+    });
+  }
   let files: any = [];
   data.fileList.forEach((element: any) => {
     files.push(element.response.data);
   });
   data.addData.imgUrlList = files;
+
   request({
     url: `/business/tags/add`,
     method: "post",
@@ -215,91 +269,50 @@ const addTag = () => {
       tagType: 1, ///朋友圈1、组队2
       // videoUrl: "string",
     },
+    loading: true,
   })
     .then((res: any) => {
-      console.log(res)
-        data.listItem.pageNum = 1;
-        getList();
-        ElMessage({
-          message: "发布成功",
-          type: "success",
-        });
+      // data.listItem.pageNum = 1;
+      data.addData = {};
+      getList();
+      ElMessage({
+        message: "发布成功",
+        type: "success",
+      });
     })
     .catch((err) => {
-      console.log(err);
+      ElMessage({
+        message: err,
+        type: "error",
+      });
     });
 };
 //------------获取列表part
 const getList = () => {
-  data.loading = true;
-  data.listItem.loading = true;
   request({
     url: `/business/tags/get/page`,
     method: "post",
     data: {
       pageNum: data.listItem.pageNum,
       pageSize: data.listItem.pageSize,
-      tagType:1
+      tagType: 1,
     },
+    loading: true,
   })
     .then((res: any) => {
-      data.loading = false;
       if (res && res.list.length > 0) {
         data.listItem.invitationList = [...res.list];
       }
-      data.listItem.pageNum++;
-      // if (data.listItem.pageNum <= 10) {
-      //   data.listItem.loading = false;
-      //   return;
-      // }
+      data.listItem.total = res.total;
     })
     .catch((err) => {
       ElMessage({
-                message:err,
-                type: 'error',
-            });
+        message: err,
+        type: "error",
+      });
     });
 };
-//------------点赞part
-const pointLike = (item: any) => {
-  if (item.userLikeStatus === 1) {
-    request({
-      url: `/business/like/delete?tagId=${item.id}`,
-      method: "delete",
-    })
-      .then((res: any) => {
-          data.listItem.pageNum = 1;
-          item.likesList.pop();
-          item.userLikeStatus = null;
-      })
-      .catch((err) => {
-        ElMessage({
-          message: err.error_description,
-          type: "error",
-        });
-      });
-  } else {
-    request({
-      url: `/business/like/add`,
-      method: "post",
-      data: {
-        statuType: 0, //0点赞  1取消点赞
-        tagId: item.id,
-      },
-    })
-      .then((res: any) => {
-          data.listItem.pageNum = 1;
-          item.userLikeStatus = 1;
-          item.likesList.push({});
-      })
-      .catch((err) => {
-        ElMessage({
-          message: err.error_description,
-          type: "error",
-        });
-      });
-  }
-};
+
 //------------评论part
 const commentFun = (item: any) => {
   request({
@@ -312,12 +325,12 @@ const commentFun = (item: any) => {
     },
   })
     .then((res: any) => {
-        data.listItem.pageNum = 1;
-        getList();
+      data.listItem.pageNum = 1;
+      getList();
     })
     .catch((err) => {
       ElMessage({
-        message: err.error_description,
+        message: err,
         type: "error",
       });
     });
@@ -331,18 +344,19 @@ const deleteInvitation = (val: any) => {
     request({
       url: `/business/tags/delete/${val}`,
       method: "delete",
+      loading: true,
     })
       .then((res: any) => {
-          data.listItem.pageNum = 1;
-          getList();
-          ElMessage({
-            message: "删除成功",
-            type: "success",
-          });
+        data.listItem.pageNum = 1;
+        getList();
+        ElMessage({
+          message: "删除成功",
+          type: "success",
+        });
       })
       .catch((err) => {
         ElMessage({
-          message: err.error_description,
+          message: err,
           type: "error",
         });
       });
@@ -357,9 +371,59 @@ const toDetail = (val: any) => {
     },
   });
 };
+onMounted(() => {
+  getList();
+});
 </script>
 
 <style lang="less" scoped>
 @import "@/assets/css/square/square.less";
 @import "@/assets/css/common/invitation.less";
+.content-wrap {
+  height: 100%;
+  position: relative;
+  border-bottom: none !important;
+  .comment_item {
+    height: calc(100% - 116px);
+    overflow-y: auto;
+    padding-bottom: 0;
+  }
+  ::v-deep .upload_box {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    width: 100%;
+    .el-upload {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      &:hover {
+        background-color: rgba(255, 255, 255, 0.09);
+        color: #63e2b7;
+      }
+    }
+    .el-upload-list {
+      display: flex;
+      width: 100%;
+      grid-column-gap: 10px;
+      margin-top: 0;
+      flex-wrap: wrap;
+    }
+    .el-upload-list__item {
+      max-width: 90px;
+      padding: 0;
+    }
+    .el-upload-list__item-thumbnail {
+      width: 100%;
+      height: 90px;
+    }
+    .el-upload-list__item-info {
+      display: none;
+    }
+    .el-upload-list__item-status-label,
+    .el-icon--close {
+      z-index: 999;
+    }
+  }
+}
 </style>

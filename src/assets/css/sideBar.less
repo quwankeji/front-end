@@ -2,10 +2,12 @@
   z-index: 99;
   width: 200px;
   height: 100vh;
-  position: fixed;
-  left: 282px;
+  position: relative; 
+  /* left: 282px; */
   padding: 12px 0;
+  float: right;
   box-sizing: border-box;
+  margin-right: 20px;
   .logo-wrap {
     display: flex;
     justify-content: flex-start;
@@ -18,9 +20,16 @@
     }
   }
   .menu {
-    .el-menu {
+   ::v-deep .el-menu {
       border: none;
       background: transparent;
+      .el-badge {
+        width: 100%;
+        .el-badge__content.is-fixed{
+          right: 98px;
+    top: 15px;
+        }
+      }
       .el-menu-item {
         height: 42px;
         line-height: 42px;
@@ -28,6 +37,10 @@
         border-radius: 21px;
 
         color: #fff;
+       
+        i{
+          margin-right: 6px;
+        }
         &:hover {
           background: #262629;
         }
@@ -39,6 +52,8 @@
     }
   }
   .user_wrap {
+   
+    .user_name{margin-right: 5px;}
     .login {
         padding:0 18px;
         border-radius: 34px;
@@ -52,13 +67,31 @@
       background:rgba(112, 192, 232, 0.16);
     }
     .el-avatar {
+      width: 34px;
+      height: 34px;
       margin-right: 8px;
     }
-
+    width: 100%;
     position: absolute;
     bottom: 12px;
     left: 0;
     display: flex;
-    align-items: center;
+    align-items: flex-start;
+    >div{
+      width: calc(100% - 42px);
+      >div{
+        display: flex;
+        align-items: center;
+        i{
+          cursor: pointer;
+        }
+      }
+    }
+    .signature{
+      width: 100%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
   }
 }

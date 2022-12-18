@@ -1,9 +1,12 @@
 <template>
   <div class="main">
     <!-- 侧边栏 -->
-    <sideBar /> 
-
-    <div class="content-wrap">
+    <el-row class="content-box">
+    <el-col :span="8">
+      <sideBar /> 
+    </el-col>
+    <el-col :span="8">
+      <div class="content-wrap">
       <router-view class="app-wrap" v-slot="{ Component }">
         <keep-alive>
           <component v-if="$route.meta.keepAlive" :is="Component" />
@@ -11,7 +14,10 @@
         <component v-if="!$route.meta.keepAlive" :is="Component" />
       </router-view>
     </div>
-    <rightBar />
+    </el-col>
+    <el-col :span="8">
+      <rightBar /></el-col>
+  </el-row>
   </div>
 </template>
 <script>
