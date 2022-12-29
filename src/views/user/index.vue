@@ -146,7 +146,7 @@ const upLoad = {
 };
 const set = (str: any, val: any, val2: any) => {
   request({
-    url: `/user/update`,
+    url: `/api/user/user/update`,
     method: "PUT",
     data: {
       [str]: val,
@@ -157,7 +157,7 @@ const set = (str: any, val: any, val2: any) => {
       // store.getters.getUserInfo.name = data.userName;
       data[val2] = false;
       requestUserInfoById(store.getters.getUserInfo.id, () => {
-        store.commit("setUserInfo");
+        // store.commit("setUserInfo");
       });
       ElMessage({
         message: "修改成功",
@@ -184,7 +184,7 @@ const set = (str: any, val: any, val2: any) => {
   line-height: 34px;
   font-size: 16px;
 }
-::v-deep .user-info {
+:deep(.user-info)  {
   .head-image{
     width: 100px;
     display: flex;

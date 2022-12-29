@@ -1,6 +1,8 @@
 
 import request from "@/http/request"; // 引入封装的request.js文件
 import { Json } from "@vicons/carbon";
+import store from '@/store/user'
+
 import { ElMessage, ElMessageBox } from "element-plus";
 
 //------------设置token part
@@ -24,7 +26,7 @@ export const userInfo =localStorage.getItem('userInfo')?JSON.parse(localStorage.
 //------------请求用户信息part
 export const requestUserInfo = (params,callback) => {
     request({
-        url:  `/user/info`,
+        url:  `/api/user/user/info`,
         method: "post",
         data: params,
       loading:true
@@ -43,7 +45,7 @@ export const requestUserInfo = (params,callback) => {
   };
   export const requestUserInfoById = (params,callback) => {
     request({
-        url:  `/user/get/`+params,
+        url:  `/api/user/user/get/`+params,
         method: "get",
       loading:true
 
@@ -59,10 +61,25 @@ export const requestUserInfo = (params,callback) => {
             });
         });
   };
+  export const getMessageNum = () => {
+    request({
+      url: `/api/business/business/notice/get/number`,
+      method: "get",
+    })
+      .then((res: any) => {
+  store.commit('setMessageNum',res)
+      })
+      .catch((err) => {
+        ElMessage({
+          message: err,
+          type: "error",
+        });
+      });
+  };
   //------------获取融云part
   export const getRongyunToken = (params) => {
   request({
-      url:  `/token/rongcloud`,
+      url:  `/api/user/token/rongcloud`,
       method: "get",
       loading:true
     })

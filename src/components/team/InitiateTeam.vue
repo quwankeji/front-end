@@ -134,7 +134,7 @@ const onSubmit = async (formEl: FormInstance | undefined) => {
         });
       }
       request({
-        url: `/business/tags/add`,
+        url: `/api/business/business/tags/add`,
         method: "post",
         data: data.formData,
       })

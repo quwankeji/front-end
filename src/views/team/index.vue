@@ -3,89 +3,106 @@
     <div class="square_header border">
       组队
       <el-icon class="addTeam" @click="addTeam" title="发起组队"
-        ><Plus /></el-icon>
+        ><Plus
+      /></el-icon>
     </div>
-    <div
-      class="comment_item border"
-    >
-    <div class="list_item_box">
-      <div
-        class="list_item padding"
-        v-for="(item, index) in data.listItem.invitationList"
-        :key="item.id + index"
-        @click="toDetail(item.id)"
-      >
-        <div class="compose_user">
-          <el-avatar :size="30" :max="30" :src="item.portrait" />
-          <div class="comment_name">
-            <el-link type="info">{{ item.name }}</el-link>
-          </div>
-          <div class="location_time">
-            {{ item.location }}&nbsp·&nbsp{{
-              dateFormatPipe(item.createdTime, "MM-DD HH:mm")
-            }}
-            <el-icon
-              class="delete"
-              @click.stop="deleteInvitation(item.id)"
-              v-if="item.userId === userInfo?.id"
-              ><DeleteFilled
-            /></el-icon>
-          </div>
-        </div>
-        <!-- 主要内容 -->
-        <div class="comment_content">
-          <!-- 文字部分 -->
-          <p class="title">{{ item.title }}</p>
-          <p class="text">
-           <label>人数：</label> {{ item.peopleNum }}
-          </p>
-          <p class="text">
-            <label>时间：</label>{{   dateFormatPipe(item.startTime, "YYYY-MM-DD HH:mm") }}&nbsp至&nbsp{{ dateFormatPipe(item.endTime, "YYYY-MM-DD HH:mm")}}
-          </p>
-          <p class="text">
-            <label>内容：</label> {{ item.content }}
-          </p>
-          <!-- 图片 -->
-          <div class="demo-image__preview" v-if="item.imagesList.length > 0">
-            <div
-              class="image_item"
-              v-for="(url, index) in item.imagesList"
-              :key="url.id + index"
-              @click.stop=""
-            >
-              <el-image
-                :src="url.imgUrl"
-                :preview-src-list="[url.imgUrl]"
-                :initial-index="4"
-                fit="cover"
-                lazy
-              />
+    <div class="comment_item border">
+      <div class="list_item_box">
+        <div
+          class="list_item padding"
+          v-for="(item, index) in data.listItem.invitationList"
+          :key="item.id + index"
+          @click="toDetail(item.id)"
+        >
+          <div class="compose_user">
+            <el-avatar :size="30" :max="30" :src="item.portrait" />
+            <div class="comment_name">
+              <el-link type="info">{{ item.name }}</el-link>
+            </div>
+            <div class="location_time">
+              {{ item.location }}&nbsp·&nbsp{{
+                dateFormatPipe(item.createdTime, "MM-DD HH:mm")
+              }}
+              <el-icon
+                class="delete"
+                @click.stop="deleteInvitation(item.id)"
+                v-if="item.userId === userInfo?.id"
+                ><DeleteFilled
+              /></el-icon>
             </div>
           </div>
-          <div class="video">
-            <!-- <vue3VideoPlay
+          <!-- 主要内容 -->
+          <div class="comment_content">
+            <!-- 文字部分 -->
+            <p class="title">{{ item.title }}</p>
+            <p class="text"><label>人数：</label> {{ item.peopleNum }}</p>
+            <p class="text">
+              <label>时间：</label
+              >{{
+                dateFormatPipe(item.startTime, "YYYY-MM-DD HH:mm")
+              }}&nbsp至&nbsp{{
+                dateFormatPipe(item.endTime, "YYYY-MM-DD HH:mm")
+              }}
+            </p>
+            <p class="text"><label>内容：</label> {{ item.content }}</p>
+            <!-- 图片 -->
+            <div class="demo-image__preview" v-if="item.imagesList.length > 0">
+              <div
+                class="image_item"
+                v-for="(url, index) in item.imagesList"
+                :key="url.id + index"
+                @click.stop=""
+              >
+                <el-image
+                  :src="url.imgUrl"
+                  :preview-src-list="[url.imgUrl]"
+                  :initial-index="4"
+                  fit="cover"
+                  lazy
+                />
+              </div>
+            </div>
+            <div class="video">
+              <!-- <vue3VideoPlay
               :src="video"
               poster="https://cdn.jsdelivr.net/gh/xdlumia/files/video-play/ironMan.jpg"
             /> -->
+            </div>
+            <!-- 视频 -->
           </div>
-          <!-- 视频 -->
-        </div>
-        <div class="bottom_function">
-          <div class="opt-item"   @click.stop="joinTeam(item)">
-            <n-icon size="20" :title="item.userTeamStatus?'取消加入':'加入组队'">
+          <div class="bottom_function">
+            <div class="opt-item team_item" @click.stop="joinTeam(item,data.canClick,changeStore,getList)">
+              <n-icon
+                size="20"
+                :title="item.userTeamStatus ? '取消加入' : '加入组队'"
+              >
                 <people-team-add-24-regular v-if="!item.userTeamStatus" />
-                <people-team-32-filled v-if="item.userTeamStatus" color="#63e2b7" />
+                <people-team-32-filled
+                  v-if="item.userTeamStatus"
+                  color="#63e2b7"
+                />
               </n-icon>
-          </div>
-          <div class="opt-item"  @click.stop="pointLike(2,item)">
-            <n-icon size="20">
+              <span>{{ item.teammateList.length }}</span>
+              <div :class="{ inner_people: item.teammateList.length > 0 }">
+                <div v-for="(people, index2) in item.teammateList"
+                    :key="index2">
+                  <el-avatar
+                    :size="30"
+                    :max="30"
+                    :src="people?.userVO?.portrait"
+                  />
+                </div>
+              </div>
+            </div>
+            <div class="opt-item" @click.stop="pointLike(2, item)">
+              <n-icon size="20">
                 <heart-outline v-if="!item.userLikeStatus" />
                 <heart v-if="item.userLikeStatus" color="#f56c6c" />
               </n-icon>
               <span>{{ item.likesList.length }}</span>
-          </div>
-          <div class="opt-item" @click.stop="pointStar(2,item)">
-            <n-icon size="20">
+            </div>
+            <div class="opt-item" @click.stop="pointStar(2, item)">
+              <n-icon size="20">
                 <star-12-regular
                   v-if="!item.userFavoriteStatus"
                 ></star-12-regular>
@@ -94,11 +111,11 @@
                   color="#ff7600"
                 ></star-12-filled>
               </n-icon>
+            </div>
           </div>
         </div>
       </div>
-    </div>
-    <el-pagination
+      <el-pagination
         :hide-on-single-page="data.listItem.invitationList.length === 0"
         :page-sizes="[10, 15, 20, 25]"
         layout="prev, pager, next"
@@ -107,26 +124,32 @@
         @size-change="handleSizeChange"
         @current-change="handleCurrentChange"
       />
+    </div>
   </div>
-  </div>
-    <InitiateTeam ref="addTeamDialog" :getList="getList" />
+  <InitiateTeam ref="addTeamDialog" :getList="getList" />
 </template>
 
 <script lang="ts" setup>
-import { ref, reactive, toRefs,onMounted } from "vue";
+import { ref, reactive, toRefs, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import { ElMessage, ElMessageBox } from "element-plus";
 import { dateFormatPipe } from "@/util/index";
-import { userInfo} from "@/util/user";
+import { userInfo } from "@/util/user";
 import request from "@/http/request"; // 引入封装的request.js文件
-import { pointStar, pointLike,joinTeam } from "@/util/common.ts";
+import { pointStar, pointLike, joinTeam } from "@/util/common.ts";
 import { NIcon } from "naive-ui";
 import { ImageOutline, HeartOutline, Heart } from "@vicons/ionicons5";
 import { LikeFilled, LikeOutlined } from "@vicons/antd";
-import { Comment20Regular, Star12Regular, Star12Filled,PeopleTeamAdd24Regular,PeopleTeam32Filled } from "@vicons/fluent";
+import {
+  Comment20Regular,
+  Star12Regular,
+  Star12Filled,
+  PeopleTeamAdd24Regular,
+  PeopleTeam32Filled,
+} from "@vicons/fluent";
 
 import InitiateTeam from "@/components/team/InitiateTeam.vue";
-const addTeamDialog:any = ref(null)
+const addTeamDialog: any = ref(null);
 
 const router = useRouter();
 const data = reactive({
@@ -135,19 +158,19 @@ const data = reactive({
   loading: false,
   userImg:
     "https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png",
-  
+    canClick:true,
   listItem: {
     pageNum: 1,
     pageSize: 20,
     initLoading: true,
     loading: false,
-    total:0,
+    total: 0,
     invitationList: [] as any,
   },
 });
 //------------发起组队
 const addTeam = () => {
-  addTeamDialog.value.data.visible = true
+  addTeamDialog.value.data.visible = true;
 };
 const handleSizeChange = (val: number) => {
   data.listItem.pageSize = val;
@@ -157,32 +180,35 @@ const handleCurrentChange = (val: number) => {
   data.listItem.pageNum = val;
   getList();
 };
+const changeStore = ()=>{
+  data.canClick = false;
+}
 //------------获取列表part
-const getList = () => {
+const getList = (loading?:boolean) => {
   request({
-    url: `/business/tags/get/page`,
+    url: `/api/business/business/tags/get/page`,
     method: "post",
     data: {
       pageNum: data.listItem.pageNum,
       pageSize: data.listItem.pageSize,
-      tagType:2
+      tagType: 2,
     },
-    loading:true
-
+    loading: !loading,
   })
     .then((res: any) => {
       if (res && res.list.length > 0) {
         data.listItem.invitationList = [...res.list];
       }
       data.listItem.total = res.total;
-   
+      data.canClick = true;
     })
     .catch((err) => {
       ElMessage({
-                message:err,
-                type: 'error',
-                duration: 3000
-            });
+        message: err,
+        type: "error",
+        duration: 3000,
+      });
+      data.canClick = true;
     });
 };
 
@@ -193,18 +219,17 @@ const deleteInvitation = (val: any) => {
     cancelButtonText: "取消",
   }).then(() => {
     request({
-      url: `/business/tags/delete/${val}`,
+      url: `/api/business/business/tags/delete/${val}`,
       method: "delete",
-    loading:true
-
+      loading: true,
     })
       .then((res: any) => {
-          data.listItem.pageNum = 1;
-          getList();
-          ElMessage({
-            message: "删除成功",
-            type: "success",
-          });
+        data.listItem.pageNum = 1;
+        getList();
+        ElMessage({
+          message: "删除成功",
+          type: "success",
+        });
       })
       .catch((err) => {
         ElMessage({
@@ -233,14 +258,15 @@ onMounted(() => {
 @import "@/assets/css/square/square.less";
 @import "@/assets/css/common/invitation.less";
 .content-wrap {
-  .comment_item{
- 
-height:  calc(100% - 118px);
-overflow-y: auto;
-.list_item_box{
-  height:  100%;
-overflow-y: auto;
-}
+  .comment_item {
+    height: calc(100% - 118px);
+    overflow-y: auto;
+    .list_item_box {
+      height: 100%;
+      overflow-y: auto;
+    }
+
+
   }
 }
 </style>

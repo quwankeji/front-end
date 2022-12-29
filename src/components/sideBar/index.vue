@@ -20,9 +20,9 @@
           组队
         </el-menu-item>
         <el-badge
-          :value="data.messageNum"
+          :value="store.state.messageNum"
           class="item"
-          v-if="store.getters.getUserInfo && data.messageNum"
+          v-if="store.getters.getUserInfo && store.state.messageNum"
         >
           <el-menu-item index="/message">
             <n-icon size="18">
@@ -31,22 +31,15 @@
             消息通知
           </el-menu-item>
         </el-badge>
-        <!--  <el-menu-item index="1">
-          <el-icon><House /></el-icon>
-          话题
+        <el-menu-item
+          index="/message"
+          v-if="store.state.getUserInfo && store.state.messageNum === 0"
+        >
+        <n-icon size="18">
+              <bell-regular />
+            </n-icon>
+          消息通知
         </el-menu-item>
-        <el-menu-item index="2">
-          <el-icon><House /></el-icon>
-          话题
-        </el-menu-item>
-        <el-menu-item index="3">
-          <el-icon><House /></el-icon>
-          主页
-        </el-menu-item>
-        <el-menu-item index="4">
-          <el-icon><House /></el-icon>
-          提醒
-        </el-menu-item> -->
         <!-- <el-menu-item
           index=""
           @click="openChat"
@@ -64,13 +57,7 @@
           收藏
         </el-menu-item>
 
-        <el-menu-item
-          index="/message"
-          v-if="store.getters.getUserInfo && data.messageNum === 0"
-        >
-          <el-icon><Star /></el-icon>
-          消息通知
-        </el-menu-item>
+     
         <el-menu-item index="/my" v-if="store.getters.getUserInfo">
           <n-icon size="18">
               <user-regular />
@@ -138,7 +125,7 @@ const loginDialog = ref(null);
 const router: any = useRouter();
 const store = useStore();
 
-const data = reactive({
+const data:any = reactive({
   dialogTableVisible: false,
   showLogin: true,
   messageNum: 0,
@@ -169,31 +156,10 @@ const loginOut = () => {
     window.location.reload();
   });
 };
-const getMessageNum = () => {
-  request({
-    url: `/business/notice/get/number`,
-    method: "get",
-  })
-    .then((res: any) => {
-      data.messageNum = res;
-    })
-    .catch((err) => {
-      ElMessage({
-        message: err,
-        type: "error",
-      });
-    });
-};
+
 onMounted(() => {
-  debugger
-  let timer = null;
-  if (store.getters.getUserInfo) {
-    timer = setInterval(() => {
-      getMessageNum();
-    }, 2000);
-  } else {
-    clearInterval(timer);
-  }
+  store.commit('setMessageTimer')
+ 
 });
 </script>
 

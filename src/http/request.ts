@@ -14,6 +14,8 @@ const service = axios.create({
 service.interceptors.request.use(
     config => {
         //存储token
+         
+
         if(config.loading){
             showLoading()
         }
@@ -30,6 +32,7 @@ service.interceptors.request.use(
 // 响应拦截器
 service.interceptors.response.use(
     response => {
+         
         setTimeout(() => {
             hideLoading()
           }, 200)
@@ -54,11 +57,13 @@ service.interceptors.response.use(
             hideLoading()
           }, 200)
         if(error.response) {
+             ;
             let code = error.response.status;
             if(code == 401) { 
                 // removeToken('token');
                 // removeToken('userInfo');
                 // store.commit('setUserInfo')
+                store.commit('removeMessageTimer')
                 store.commit('removeUserInfo')
                 store.commit('setUserVisible',true)
                 return Promise.reject(
