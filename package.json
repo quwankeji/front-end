@@ -4,8 +4,14 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
+<<<<<<< Updated upstream
     "dev": "vite",
     "build": "vue-tsc --noEmit && vite build",
+=======
+    "dev": "vite --mode _local",
+    "olsb": "vite --mode olsb",
+    "build": "vite build",
+>>>>>>> Stashed changes
     "preview": "vite preview"
   },
   "dependencies": {
@@ -20,6 +26,7 @@
     "moment": "^2.29.4",
     "normalize.css": "^8.0.1",
     "path": "^0.12.7",
+    "terser": "^5.16.1",
     "vicons": "0.0.1",
     "vue": "^3.2.37",
     "vue-infinite-scroll": "^2.0.2",
