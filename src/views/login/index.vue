@@ -169,12 +169,12 @@ const onSubmit = async (formEl: FormInstance | undefined) => {
                 password: data.formData.password,
               },
               () => {
-                // store.commit('setUserInfo')
                 ElMessage({
                   message: msg,
                   type: "success",
                   duration: 5000,
                 });
+                
                 window.location.reload();
               }
             );

@@ -50,7 +50,7 @@
         <el-form-item label="图片/视频：" prop="content">
           <el-upload
             class="upload"
-            :action="'/file/path'"
+            :action="'/api/file/path'"
             :accept="upLoad.accept"
             :before-upload="(file:any) => upLoad.handleBeforeUpload(file, upLoad.accept)"
             :on-success="upLoad.handleSuccess"

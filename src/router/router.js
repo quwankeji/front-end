@@ -53,6 +53,11 @@ const routes = [
         path: "/message",
         component: () => import("@/views/message/index.vue")
 
-    }
+    },
+    // {
+    //     name: "chat",
+    //     path: "/chat",
+    //     component: () => import("@/components/chat/chat.vue")
+    // },
 ]
 export default routes;

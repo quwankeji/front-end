@@ -13,7 +13,6 @@ import router from "./router/index"
 import store from './store/user'
 import App from './App.vue'
 const app = createApp(App)
-console.log('import.meta.env',import.meta.env)
 for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
     app.component(key, component)
   }

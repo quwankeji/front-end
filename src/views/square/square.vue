@@ -37,7 +37,7 @@
             <el-upload
               ref="tagUpload"
               class="tag-upload"
-              :action="'/file/path'"
+              :action="'/api/file/path'"
               :accept="upLoad.accept"
               list-type="picture"
               :before-upload="(file:any) => upLoad.handleBeforeUpload(file, upLoad.accept)"

@@ -33,7 +33,7 @@
         </el-badge>
         <el-menu-item
           index="/message"
-          v-if="store.state.getUserInfo && store.state.messageNum === 0"
+          v-if="store.getters.getUserInfo && store.state.messageNum === 0"
         >
         <n-icon size="18">
               <bell-regular />
@@ -54,7 +54,7 @@
                 ></star-12-regular>
             </n-icon>
 
-          收藏
+          个人收藏
         </el-menu-item>
 
      
@@ -63,7 +63,7 @@
               <user-regular />
             </n-icon>
           
-          我的
+          用户中心
         </el-menu-item>
       </el-menu>
     </div>
@@ -158,8 +158,9 @@ const loginOut = () => {
 };
 
 onMounted(() => {
-  store.commit('setMessageTimer')
- 
+  if(store.getters.getUserInfo){
+    store.commit('setMessageTimer')
+  }
 });
 </script>
 

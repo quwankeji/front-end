@@ -7,7 +7,7 @@ export default ({ mode }) => {
   const env = loadEnv(mode, root);
   return defineConfig({
     server: {
-      host: "192.168.0.153",
+      host: "192.168.23.101",
       port: 8081,
       proxy: {
         "/api": {
