@@ -37,7 +37,7 @@
             <el-upload
               ref="tagUpload"
               class="tag-upload"
-              :action="'/file/path'"
+              :action="'/api/file/path'"
               :accept="upLoad.accept"
               list-type="picture"
               :before-upload="(file:any) => upLoad.handleBeforeUpload(file, upLoad.accept)"
@@ -51,6 +51,24 @@
               </n-icon>
             </el-upload>
           </div>
+          <!-- <n-upload-trigger
+                            #="{ handleClick }" abstract>
+                            <n-button
+                               
+                                quaternary
+                                circle
+                                type="primary"
+                            >
+                                <template #icon>
+                                    <n-icon
+                                        size="20"
+                                        color="var(--primary-color)"
+                                    >
+                                        <videocam-outline />
+                                    </n-icon>
+                                </template>
+                            </n-button>
+                        </n-upload-trigger> -->
           <div class="fb">
             <el-button type="primary" @click="addTag">发布</el-button>
           </div>
@@ -260,7 +278,7 @@ const addTag = () => {
   data.addData.imgUrlList = files;
 
   request({
-    url: `/business/tags/add`,
+    url: `/api/business/business/tags/add`,
     method: "post",
     data: {
       content: data.addData.content,
@@ -290,7 +308,7 @@ const addTag = () => {
 //------------获取列表part
 const getList = () => {
   request({
-    url: `/business/tags/get/page`,
+    url: `/api/business/business/tags/get/page`,
     method: "post",
     data: {
       pageNum: data.listItem.pageNum,
@@ -316,7 +334,7 @@ const getList = () => {
 //------------评论part
 const commentFun = (item: any) => {
   request({
-    url: `/business/comment/add`,
+    url: `/api/business/business/comment/add`,
     method: "post",
     data: {
       comment: 0, //0点赞  1取消点赞
@@ -342,7 +360,7 @@ const deleteInvitation = (val: any) => {
     cancelButtonText: "取消",
   }).then(() => {
     request({
-      url: `/business/tags/delete/${val}`,
+      url: `/api/business/business/tags/delete/${val}`,
       method: "delete",
       loading: true,
     })
@@ -388,7 +406,7 @@ onMounted(() => {
     overflow-y: auto;
     padding-bottom: 0;
   }
-  ::v-deep .upload_box {
+  :deep(.upload_box) {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;

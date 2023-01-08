@@ -38,6 +38,34 @@
         right: 5px;
         bottom: 12px;
       }
+      .team_item {
+        position: relative;
+  
+        .inner_people {
+          visibility: hidden;
+          position: absolute;
+          max-width: 200px;
+          gap: 10px;
+          display: flex;
+          top: 30px;
+          border: 1px solid rgba(255, 255, 255, 0.24);
+          padding: 10px;
+          background: #101014;
+          z-index: 999;
+          > div {
+            .el-avatar {
+            margin-left: 0 !important;
+            float: left;
+          }
+          }
+         
+        }
+        &:hover {
+          .inner_people {
+            visibility: initial;
+          }
+        }
+      }
         .list_item {
       border-bottom: 1px solid rgba(255, 255, 255, 0.24);
 

@@ -84,13 +84,13 @@ const handleCurrentChange = (val: number) => {
   data.pageNum = val;
   getList();
 };
-const change = (val,event)=>{debugger
+const change = (val,event)=>{
   data.read = val.paneName;
   getList()
 }
 const getList = () => {
   request({
-    url: `/business/notice/page`,
+    url: `/api/business/business/notice/page`,
     method: "post",
     data: {
       pageNum: data.pageNum,
@@ -138,7 +138,7 @@ onMounted(() => {
 </script>
 <style lang="less" scoped>
 @import "@/assets/css/common/invitation.less";
-::v-deep .el-tabs__header{
+:deep(.el-tabs__header){
   margin-bottom: 0;
   border-bottom: 1px solid rgba(255, 255, 255, 0.24);
   .el-tabs__nav{

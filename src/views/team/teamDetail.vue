@@ -4,7 +4,7 @@
       <el-icon @click="back()"><ArrowLeft /></el-icon>
       <span> 组队详情</span>
     </div>
-    <div class="content" v-loading="data.loading">
+    <div class="content">
       <div class="padding border comment_item">
         <div class="list_item">
           <div class="compose_user">
@@ -81,12 +81,23 @@
             <!-- 视频 -->
           </div>
           <div class="bottom_function">
-            <div class="opt-item" @click.stop="joinTeam(data.invitationDetail)">
+            <div class="opt-item team_item" @click.stop="joinTeam(data.invitationDetail,data.canClick,changeStore,getDetail)">
 
               <n-icon size="20" :title="data.invitationDetail?.userTeamStatus?'取消加入':'加入组队'">
                 <people-team-add-24-regular v-if="!data.invitationDetail?.userTeamStatus" />
                 <people-team-32-filled v-if="data.invitationDetail?.userTeamStatus" color="#63e2b7" />
               </n-icon>
+              <span>{{ data.invitationDetail?.teammateList?.length }}</span>
+             <div :class="{ inner_people: data.invitationDetail?.teammateList?.length > 0 }">
+                <div v-for="(people, index2) in data.invitationDetail?.teammateList"
+                    :key="index2">
+                  <el-avatar
+                    :size="30"
+                    :max="30"
+                    :src="people?.userVO?.portrait"
+                  />
+                </div>
+              </div> 
             </div>
             <div
               class="opt-item"
@@ -256,10 +267,6 @@ import { ImageOutline, HeartOutline, Heart } from "@vicons/ionicons5";
 import { LikeFilled, LikeOutlined } from "@vicons/antd";
 import { Comment20Regular, Star12Regular, Star12Filled,PeopleTeamAdd24Regular,PeopleTeam32Filled } from "@vicons/fluent";
 import { userInfo } from "@/util/user";
-
-import axios from "axios";
-import video from "@/assets/video/a.mp4";
-import { start } from "@popperjs/core";
 const route = useRoute();
 const router = useRouter();
 const data = reactive({
@@ -267,6 +274,7 @@ const data = reactive({
   loading: false,
   textarea: "",
   fileList: [],
+  canClick:true,
   invitationDetail: {
     imagesList: [],
     likesList: [],
@@ -315,21 +323,25 @@ const upLoad = {
     }
   },
 };
+const changeStore = ()=>{
+  data.canClick = false;
+}
 //------------获取详情part
-const getDetail = () => {
+const getDetail = (loading?:boolean) => {
+  debugger
   data.id = route.query.id;
-  data.loading = true;
   request({
-    url: `/business/tags/get/${data.id}`,
+    url: `/api/business/business/tags/get/${data.id}`,
     method: "get",
-    loading: true,
+    loading:  !loading,
   })
     .then((res: any) => {
       console.log("res", res);
       data.invitationDetail = res;
-      data.loading = false;
+      data.canClick = true;
     })
     .catch((err) => {
+      data.canClick = true;
       ElMessage({
         message: err,
         type: "error",
@@ -353,7 +365,7 @@ const commentFun = () => {
     userId: userInfo.id,
   };
   request({
-    url: `/business/comment/add`,
+    url: `/api/business/business/comment/add`,
     method: "post",
     data: params,
     loading: true,
@@ -379,14 +391,12 @@ const deleteComment = (id: any) => {
     confirmButtonText: "确定",
     cancelButtonText: "取消",
   }).then(() => {
-    data.loading = true;
     request({
-      url: `/business/comment/${id}`,
+      url: `/api/business/business/comment/${id}`,
       method: "delete",
       loading: true,
     })
       .then((res: any) => {
-        data.loading = false;
         getDetail();
         ElMessage({
           message: "删除成功",
@@ -394,7 +404,6 @@ const deleteComment = (id: any) => {
         });
       })
       .catch((err) => {
-        data.loading = false;
         ElMessage({
           message: err,
           type: "error",
@@ -411,7 +420,7 @@ onMounted(() => {
   getDetail();
   if (route.query.haveRead) {
     request({
-      url: `/business/notice/read?id=${route.query.messageId}`,
+      url: `/api/business/business/notice/read?id=${route.query.messageId}`,
       method: "post",
       loading: true,
     })

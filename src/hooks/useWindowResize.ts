@@ -62,7 +62,7 @@ export default function () {
       }
     },
     getCurrentRow(currentRow){
-      debugger
+      
       this.tableRadio = currentRow
       console.log(this.tableRadio)
       console.log(this.radio)

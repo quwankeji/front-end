@@ -21,7 +21,7 @@
         :rules="data.rules"
         label-width="80px"
       >
-        <el-form-item label="账号" prop="username">
+        <el-form-item label="用户名" prop="username">
           <el-input
             v-model="data.formData.username"
             :placeholder="
@@ -66,13 +66,41 @@ import type { FormInstance, FormRules } from "element-plus";
 import { ElMessage, ElMessageBox } from "element-plus";
 import request from "@/http/request"; // 引入封装的request.js文件
 import { setToken, requestUserInfo, getRongyunToken } from "@/util/user"; // 引入封装的request.js文件
-import { fa } from "element-plus/es/locale";
 import { useRouter } from "vue-router";
-import { useStore } from "vuex"
+import { useStore } from "vuex";
 const router = useRouter();
 const store = useStore();
 
 const loginForm = ref<FormInstance>();
+const checkUserName = (rule, value, callback) => {
+  if (value === "") {
+    callback(new Error("请输入账号"));
+  } else {
+    if(data.activeIndex == '1' ){
+      callback();
+    }else{
+      request({
+      url: `/api/user/user/check?userName=${value}`,
+      method: "get",
+    })
+      .then((res: any) => {
+        if(!res){
+          callback(new Error("账号已存在"));
+        }else{
+        callback();
+        }
+      })
+      .catch((err) => {
+        ElMessage({
+          message: err,
+          type: "error",
+          duration: 5000,
+        });
+      });
+    }
+    
+  }
+};
 const data = reactive({
   formData: {
     grant_type: "password",
@@ -84,13 +112,14 @@ const data = reactive({
   },
   activeIndex: "1",
   rules: {
-    username: [{ required: true, message: "请输入账号", trigger: "blur" }],
+    username: [{ required: true,validator: checkUserName, trigger: "blur" }],
     password: [{ required: true, message: "请输入密码", trigger: "blur" }],
     surePassword: [
       { required: true, message: "请输入确认密码", trigger: "blur" },
     ],
   },
 });
+
 //------------切换part
 const handleSelect = (key, keyPath) => {
   data.activeIndex = key;
@@ -102,7 +131,7 @@ const onSubmit = async (formEl: FormInstance | undefined) => {
   if (!formEl) return;
   await formEl.validate((valid, fields) => {
     if (valid) {
-      let url = `/oauth/token`;
+      let url = `/api/oauth/token`;
       let msg = "登录成功";
       let headers: any = {
         "Content-Type": "application/x-www-form-urlencoded",
@@ -116,7 +145,7 @@ const onSubmit = async (formEl: FormInstance | undefined) => {
           });
         }
         headers = {};
-        url = `/user/register`;
+        url = `/api/user/user/register`;
         msg = "注册成功";
         params = {
           name: data.formData.username,
@@ -128,41 +157,43 @@ const onSubmit = async (formEl: FormInstance | undefined) => {
         method: "post",
         data: params,
         headers,
-        loading:true
+        loading: true,
       })
         .then((res: any) => {
           if (res && res.access_token) {
             setToken(res.access_token);
             getRongyunToken();
-            requestUserInfo({
-              name: data.formData.username,
-              password: data.formData.password,
-            },()=>{
-              store.commit('setUserInfo')
-              ElMessage({
-                message: msg,
-                type: "success",
-                duration:5000
-              });
-              window.location.reload()
-             
-            });
+            requestUserInfo(
+              {
+                name: data.formData.username,
+                password: data.formData.password,
+              },
+              () => {
+                ElMessage({
+                  message: msg,
+                  type: "success",
+                  duration: 5000,
+                });
+                
+                window.location.reload();
+              }
+            );
           }
-        
+
           onClose();
         })
         .catch((err) => {
           ElMessage({
             message: err,
             type: "error",
-            duration:5000
+            duration: 5000,
           });
         });
     }
   });
 };
 const onClose = () => {
-  store.commit('setUserVisible',false)
+  store.commit("setUserVisible", false);
 };
 
 // 将变量暴露出来

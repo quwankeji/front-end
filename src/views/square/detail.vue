@@ -239,12 +239,9 @@ import request from "@/http/request"; // 引入封装的request.js文件
 import { pointStar, pointLike } from "@/util/common.ts";
 import { userInfo } from "@/util/user";
 import { NIcon } from "naive-ui";
-import { ImageOutline } from "@vicons/ionicons5";
 import { LikeFilled, LikeOutlined } from "@vicons/antd";
 import { Comment20Regular, Star12Regular, Star12Filled } from "@vicons/fluent";
 import axios from "axios";
-import video from "@/assets/video/a.mp4";
-import { start } from "@popperjs/core";
 const route = useRoute();
 const router = useRouter();
 const data = reactive({
@@ -305,7 +302,7 @@ const getDetail = () => {
   data.id = route.query.id;
   data.loading = true;
   request({
-    url: `/business/tags/get/${data.id}`,
+    url: `/api/business/business/tags/get/${data.id}`,
     method: "get",
     loading: true,
   })
@@ -343,7 +340,7 @@ const commentFun = () => {
     userId: userInfo.id,
   };
   request({
-    url: `/business/comment/add`,
+    url: `/api/business/business/comment/add`,
     method: "post",
     data: params,
     loading: true,
@@ -371,7 +368,7 @@ const deleteComment = (id: any) => {
   }).then(() => {
     data.loading = true;
     request({
-      url: `/business/comment/${id}`,
+      url: `/api/business/business/comment/${id}`,
       method: "delete",
       loading: true,
     })
@@ -401,7 +398,7 @@ onMounted(() => {
   getDetail();
   if (route.query.haveRead) {
     request({
-      url: `/business/notice/read?id=${route.query.messageId}`,
+      url: `/api/business/business/notice/read?id=${route.query.messageId}`,
       method: "post",
       loading: true,
     })

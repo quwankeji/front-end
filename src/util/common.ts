@@ -4,7 +4,7 @@ import { tr } from "element-plus/es/locale";
 //------------点赞part
 export const pointLike = (index:any,item: any) => {
   let options = {
-    url: `/business/like/add`,
+    url: `/api/business/business/like/add`,
     method: "post",
     data: {
       statuType: 0, //0点赞  1取消点赞
@@ -13,7 +13,7 @@ export const pointLike = (index:any,item: any) => {
   };
   if (item.userLikeStatus === 1) {
     options = {
-      url: `/business/like/delete?tagId=${item.id}`,
+      url: `/api/business/business/like/delete?tagId=${item.id}`,
       method: "delete",
     };
   }
@@ -43,7 +43,7 @@ export const pointLike = (index:any,item: any) => {
 //------------收藏part
 export const pointStar = (index:any,item: any) => {
   let options = {
-    url: `/business/favorite/add`,
+    url: `/api/business/business/favorite/add`,
     method: "post",
     data: {
       remark:null, //0点赞  1取消点赞
@@ -75,7 +75,7 @@ export const pointStar = (index:any,item: any) => {
   }
   if (item.userFavoriteStatus) {
     options = {
-      url: `/business/favorite/delete?tagId=${item.id}`,
+      url: `/api/business/business/favorite/delete?tagId=${item.id}`,
       method: "delete",
     };
     fun(options)
@@ -96,23 +96,32 @@ export const pointStar = (index:any,item: any) => {
 };
 
 //------------加入组队part
-export const joinTeam = (item:any)=>{
-  let type = item.userTeamStatus?'delete':'post'
-  request({
-      url: `/business/teammate/team?tagId=${item.id}`,
-      method: type
-    })
-      .then((res: any) => {
-        item.userTeamStatus = !item.userTeamStatus;
-          ElMessage({
-            message:item.userTeamStatus? "加入成功":'取消成功',
-            type: "success",
-          });
+export const joinTeam = (item:any,canClick,callBack,getList)=>{
+  if(canClick){
+    if(typeof(callBack)=='function'){
+      callBack()
+    }
+    let type = item.userTeamStatus?'delete':'post';
+    request({
+        url: `/api/business/business/teammate/team?tagId=${item.id}`,
+        method: type
       })
-      .catch((err) => {
-        ElMessage({
-          message: err,
-          type: "error",
+        .then((res: any) => {
+          // item.userTeamStatus = !item.userTeamStatus;
+          if(typeof(getList)=='function'){
+            getList(true)
+          }
+            ElMessage({
+              message:item.userTeamStatus? "加入成功":'取消成功',
+              type: "success",
+            });
+        })
+        .catch((err) => {
+          ElMessage({
+            message: err,
+            type: "error",
+          });
         });
-      });
+  }
+
 }

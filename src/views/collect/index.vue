@@ -75,7 +75,7 @@ const handleCurrentChange = (val: number) => {
 };
 const getList = () => {
   request({
-    url: `/business/favorite/page`,
+    url: `/api/business/business/favorite/page`,
     method: "post",
     data: {
       pageNum: data.pageNum,
