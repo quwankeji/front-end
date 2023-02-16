@@ -1,13 +1,19 @@
 import { defineConfig, loadEnv, ConfigEnv, UserConfigExport } from "vite";
 import vue from "@vitejs/plugin-vue";
 import path from "path";
+import {PrefetchLazyPathsPlugin}  from "./src/PrefetchLazyPathsPlugin"//优化性能，还没写完
+// vite.config.ts
+const lazyPaths = [
+  '/src/views/square/index.vue',//没用
+];
+
 // 本地无/api，线上有api
 export default ({ mode }) => {
   const root = process.cwd();
   const env = loadEnv(mode, root);
   return defineConfig({
     server: {
-      host: "192.168.23.101",
+      host: "192.168.23.103",
       port: 8081,
       proxy: {
         "/api": {
@@ -55,7 +61,7 @@ export default ({ mode }) => {
         // },
       },
     },
-    plugins: [vue()],
+    plugins: [vue(),PrefetchLazyPathsPlugin(lazyPaths,1000)],
     base: "./",
     resolve: {
       alias: {
