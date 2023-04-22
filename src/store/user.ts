@@ -42,7 +42,7 @@ export default createStore({
     setMessageTimer(state) {
       state.messageTimer  = setInterval(() => {
         getMessageNum();
-      }, 2000);
+      }, 5000);
     },
     removeMessageTimer(state){
        
