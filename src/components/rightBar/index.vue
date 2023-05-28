@@ -1,7 +1,7 @@
 <template>
     <div class="rightbar-wrap">
       <div class="copyright">
-      <a href="https://quwan.tech/" target="_blank" class="ym">© 2023 quwan.tech</a>
+      <a class="ym">© 2023 quwan.tech</a>
       <a href="https://beian.miit.gov.cn/" target="_blank" class="hash-link nav-link">湘ICP备2023000923号-1</a>
     </div>
     </div>

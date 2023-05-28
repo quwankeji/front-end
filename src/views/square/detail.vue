@@ -307,7 +307,7 @@ const getDetail = () => {
     loading: true,
   })
     .then((res: any) => {
-      data.invitationDetail = res;
+      data.invitationDetail = res.retObject;
       data.loading = false;
     })
     .catch((err) => {

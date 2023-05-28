@@ -160,8 +160,8 @@ const onSubmit = async (formEl: FormInstance | undefined) => {
         loading: true,
       })
         .then((res: any) => {
-          if (res && res.access_token) {
-            setToken(res.access_token);
+           if (res.retObject && res.retObject.access_token) {
+            setToken(res.retObject.access_token);
             getRongyunToken();
             requestUserInfo(
               {

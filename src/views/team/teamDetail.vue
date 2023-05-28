@@ -337,7 +337,7 @@ const getDetail = (loading?:boolean) => {
   })
     .then((res: any) => {
       console.log("res", res);
-      data.invitationDetail = res;
+      data.invitationDetail = res.retObject;
       data.canClick = true;
     })
     .catch((err) => {

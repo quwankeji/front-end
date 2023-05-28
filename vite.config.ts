@@ -13,8 +13,9 @@ export default ({ mode }) => {
   const env = loadEnv(mode, root);
   return defineConfig({
     server: {
-      host: "192.168.23.101",
+      host: "192.168.23.103",
       port: 8081,
+      https: false,
       proxy: {
         "/api": {
           target:env.VITE_API_URL,

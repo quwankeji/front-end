@@ -318,10 +318,11 @@ const getList = () => {
     loading: true,
   })
     .then((res: any) => {
-      if (res && res.list.length > 0) {
-        data.listItem.invitationList = [...res.list];
+      console.log(res.retObject)
+      if (res.retObject && res.retObject.list.length > 0) {
+        data.listItem.invitationList = [...res.retObject.list];
       }
-      data.listItem.total = res.total;
+      data.listItem.total = res.retObject.total;
     })
     .catch((err) => {
       ElMessage({

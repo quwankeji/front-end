@@ -196,10 +196,10 @@ const getList = (loading?:boolean) => {
     loading: !loading,
   })
     .then((res: any) => {
-      if (res && res.list.length > 0) {
-        data.listItem.invitationList = [...res.list];
+       if (res.retObject && res.retObject.list.length > 0) {
+        data.listItem.invitationList = [...res.retObject.list];
       }
-      data.listItem.total = res.total;
+      data.listItem.total = res.retObject.total;
       data.canClick = true;
     })
     .catch((err) => {

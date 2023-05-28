@@ -254,8 +254,8 @@ const load = () => {
     loading: true,
   })
     .then((res: any) => {
-      data.friendList = res;
-      console.log(11111, res);
+      data.friendList = res.retObject;
+      console.log(11111, res.retObject);
     })
     .catch((err) => {
       ElMessage({

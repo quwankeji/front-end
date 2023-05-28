@@ -88,7 +88,6 @@ export default {
           // 请根据具体 conversation 信息匹配 name、portraitUri 拼接到 converationInfo 信息中。
           const promises = [];
           conversations.forEach((conversation) => {
-            debugger
             const converationInfo = {
               ...conversation,
               name: `会话名称`,

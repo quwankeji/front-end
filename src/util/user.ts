@@ -51,7 +51,7 @@ export const requestUserInfo = (params,callback) => {
 
       })
         .then((res: any) => {
-          localStorage.setItem('userInfo',JSON.stringify(res))
+          localStorage.setItem('userInfo',JSON.stringify(res.retObject))
           callback()
         })
         .catch((err) => {
@@ -67,7 +67,7 @@ export const requestUserInfo = (params,callback) => {
       method: "get",
     })
       .then((res: any) => {
-  store.commit('setMessageNum',res)
+  store.commit('setMessageNum',res.retObject)
       })
       .catch((err) => {
         ElMessage({
@@ -84,7 +84,7 @@ export const requestUserInfo = (params,callback) => {
       loading:true
     })
       .then((res: any) => {
-        localStorage.setItem('rongYunToken',res)
+        localStorage.setItem('rongYunToken',res.retObject)
       })
       .catch((err) => {
           ElMessage({

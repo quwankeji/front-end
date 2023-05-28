@@ -101,8 +101,8 @@ const getList = () => {
 
   })
     .then((res: any) => {
-      if (res && res.list.length > 0) {
-        data.collectList = res.list;
+       if (res.retObject && res.retObject.list.length > 0) {
+        data.collectList = res.retObject.list;
       }
       // if (data.listItem.pageNum <= 10) {
       //   return;
